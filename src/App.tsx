@@ -7,6 +7,9 @@ import { AppLayout } from './layouts/AppLayout.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { AdminDashboardPage } from './pages/AdminDashboardPage.tsx';
 import { SalesmanDashboardPage } from './pages/SalesmanDashboardPage.tsx';
+import { ProductListPage } from './pages/ProductListPage.tsx';
+import { ProductFormPage } from './pages/ProductFormPage.tsx';
+import { CategoryMasterPage } from './pages/CategoryMasterPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 
 const RootRedirect: React.FC = () => {
@@ -48,6 +51,10 @@ export const App: React.FC = () => {
           <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
             <Route element={<AppLayout />}>
               <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/admin/categories" element={<CategoryMasterPage />} />
+              <Route path="/admin/products" element={<ProductListPage />} />
+              <Route path="/admin/products/new" element={<ProductFormPage />} />
+              <Route path="/admin/products/:id/edit" element={<ProductFormPage />} />
             </Route>
           </Route>
 

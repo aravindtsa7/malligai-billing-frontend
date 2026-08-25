@@ -67,13 +67,19 @@ export const LoginPage: React.FC = () => {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-header">
+          <div className="login-brand-badge">MB</div>
           <h1 className="login-title">Malligai Billing</h1>
-          <p className="login-subtitle">Sign in to your shop terminal</p>
+          <p className="login-subtitle">Shop Billing & Inventory Management</p>
         </div>
 
         {errorMessage && (
           <div className="alert alert-error" role="alert">
-            {errorMessage}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ marginRight: '8px', verticalAlign: 'text-bottom', flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{errorMessage}</span>
           </div>
         )}
 
