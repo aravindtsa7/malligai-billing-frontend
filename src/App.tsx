@@ -10,6 +10,7 @@ import { SalesmanDashboardPage } from './pages/SalesmanDashboardPage.tsx';
 import { ProductListPage } from './pages/ProductListPage.tsx';
 import { ProductFormPage } from './pages/ProductFormPage.tsx';
 import { CategoryMasterPage } from './pages/CategoryMasterPage.tsx';
+import { StockManagementPage } from './pages/StockManagementPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 
 const RootRedirect: React.FC = () => {
@@ -55,6 +56,7 @@ export const App: React.FC = () => {
               <Route path="/admin/products" element={<ProductListPage />} />
               <Route path="/admin/products/new" element={<ProductFormPage />} />
               <Route path="/admin/products/:id/edit" element={<ProductFormPage />} />
+              <Route path="/admin/stock" element={<StockManagementPage />} />
             </Route>
           </Route>
 

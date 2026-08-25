@@ -66,7 +66,9 @@ const ADMIN_MODULES: DashboardModule[] = [
     code: 'STK-04',
     title: 'Stock Management',
     description: 'Track inventory, record stock-in, and manage stock adjustment logs.',
-    status: 'Coming Soon',
+    status: 'Active',
+    route: '/admin/stock',
+    buttonLabel: 'Manage Stock →',
     iconSvg: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="18" y1="20" x2="18" y2="10" />
