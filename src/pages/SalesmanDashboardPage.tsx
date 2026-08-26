@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth.ts';
 
 interface DashboardModule {
@@ -6,7 +7,9 @@ interface DashboardModule {
   code: string;
   title: string;
   description: string;
-  status: 'Coming Soon';
+  status: 'Active' | 'Coming Soon';
+  route?: string;
+  buttonLabel?: string;
   iconSvg: React.ReactNode;
 }
 
@@ -16,7 +19,9 @@ const SALESMAN_MODULES: DashboardModule[] = [
     code: 'POS-01',
     title: 'Billing Terminal',
     description: 'Fast POS billing interface with Cash/UPI payment and receipt generation.',
-    status: 'Coming Soon',
+    status: 'Active',
+    route: '/billing',
+    buttonLabel: 'Open Billing Terminal →',
     iconSvg: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="20" height="14" rx="2" />
@@ -45,6 +50,7 @@ const SALESMAN_MODULES: DashboardModule[] = [
 
 export const SalesmanDashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="dashboard-page">
@@ -58,12 +64,20 @@ export const SalesmanDashboardPage: React.FC = () => {
 
       <div className="module-grid">
         {SALESMAN_MODULES.map((module) => (
-          <div key={module.id} className="module-card">
+          <div
+            key={module.id}
+            className={`module-card ${module.route ? 'module-card-interactive' : ''}`}
+            onClick={() => {
+              if (module.route) navigate(module.route);
+            }}
+          >
             <div className="module-card-header">
-              <div className="module-icon-box">
+              <div className={`module-icon-box ${module.status === 'Active' ? 'module-icon-active' : ''}`}>
                 {module.iconSvg}
               </div>
-              <span className="badge badge-subtle">{module.status}</span>
+              <span className={`badge ${module.status === 'Active' ? 'badge-active' : 'badge-subtle'}`}>
+                {module.status}
+              </span>
             </div>
             <div className="module-card-body">
               <div className="module-code">{module.code}</div>
@@ -71,14 +85,27 @@ export const SalesmanDashboardPage: React.FC = () => {
               <p className="module-description">{module.description}</p>
             </div>
             <div className="module-card-footer">
-              <button
-                type="button"
-                className="btn btn-outline btn-block"
-                disabled
-                title="Module will be available in subsequent phase"
-              >
-                Coming Soon
-              </button>
+              {module.route ? (
+                <button
+                  type="button"
+                  className="btn btn-primary btn-block"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(module.route!);
+                  }}
+                >
+                  {module.buttonLabel || 'Open Module →'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-outline btn-block"
+                  disabled
+                  title="Module will be available in subsequent phase"
+                >
+                  Coming Soon
+                </button>
+              )}
             </div>
           </div>
         ))}

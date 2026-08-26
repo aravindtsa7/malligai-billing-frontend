@@ -52,7 +52,9 @@ const ADMIN_MODULES: DashboardModule[] = [
     code: 'POS-03',
     title: 'Billing Terminal',
     description: 'Fast POS billing interface with Cash/UPI payment and receipt generation.',
-    status: 'Coming Soon',
+    status: 'Active',
+    route: '/billing',
+    buttonLabel: 'Open Billing Terminal →',
     iconSvg: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="20" height="14" rx="2" />
