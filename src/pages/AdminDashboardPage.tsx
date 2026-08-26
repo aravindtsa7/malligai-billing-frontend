@@ -83,8 +83,10 @@ const ADMIN_MODULES: DashboardModule[] = [
     id: 'bill-history',
     code: 'HST-05',
     title: 'Bill History',
-    description: 'View sales invoices, filter date ranges, and perform bill cancellations.',
-    status: 'Coming Soon',
+    description: 'View sales invoices, inspect items snapshots, and perform bill cancellations.',
+    status: 'Active',
+    route: '/bills',
+    buttonLabel: 'View Bill History →',
     iconSvg: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

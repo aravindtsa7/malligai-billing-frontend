@@ -987,13 +987,23 @@ export const BillingPage: React.FC = () => {
             </div>
 
             <div className="modal-footer receipt-modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => navigate(homeRoute)}
-              >
-                Go to Dashboard
-              </button>
+              <div className="receipt-modal-footer-left">
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => navigate(homeRoute)}
+                >
+                  Go to Dashboard
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => navigate(`/bills/${savedBill.id}`)}
+                  title="View authoritative invoice details"
+                >
+                  View Bill Details →
+                </button>
+              </div>
               <button
                 type="button"
                 className="btn btn-primary btn-new-bill"

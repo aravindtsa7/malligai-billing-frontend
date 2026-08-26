@@ -12,6 +12,8 @@ import { ProductFormPage } from './pages/ProductFormPage.tsx';
 import { CategoryMasterPage } from './pages/CategoryMasterPage.tsx';
 import { StockManagementPage } from './pages/StockManagementPage.tsx';
 import { BillingPage } from './pages/BillingPage.tsx';
+import { BillHistoryPage } from './pages/BillHistoryPage.tsx';
+import { BillDetailPage } from './pages/BillDetailPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 
 const RootRedirect: React.FC = () => {
@@ -68,10 +70,12 @@ export const App: React.FC = () => {
             </Route>
           </Route>
 
-          {/* Shared protected BILLING routes for ADMIN and SALESMAN */}
+          {/* Shared protected BILLING & BILL HISTORY routes for ADMIN and SALESMAN */}
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SALESMAN']} />}>
             <Route element={<AppLayout />}>
               <Route path="/billing" element={<BillingPage />} />
+              <Route path="/bills" element={<BillHistoryPage />} />
+              <Route path="/bills/:id" element={<BillDetailPage />} />
             </Route>
           </Route>
 

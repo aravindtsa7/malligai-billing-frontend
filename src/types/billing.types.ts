@@ -65,6 +65,32 @@ export interface BillSingleResponse {
   };
 }
 
+export interface BillPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ListBillsQuery {
+  page?: number;
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+  rateType?: RateType;
+  paymentType?: PaymentType;
+  status?: BillStatus;
+}
+
+export interface BillListResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    bills: SerializedBill[];
+    pagination: BillPagination;
+  };
+}
+
 export interface CartItem {
   productId: number;
   productCode: string;
