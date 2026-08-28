@@ -27,6 +27,7 @@ import {
   parseToScaledBigInt,
   formatScaledBigInt,
 } from '../utils/decimal.ts';
+import { PrintableReceipt, type PaperSize } from '../components/PrintableReceipt.tsx';
 
 export const BillingPage: React.FC = () => {
   const { user } = useAuth();
@@ -60,6 +61,19 @@ export const BillingPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedBill, setSavedBill] = useState<SerializedBill | null>(null);
+  const [paperSize, setPaperSize] = useState<PaperSize>(() => {
+    const saved = localStorage.getItem('malligai_receipt_paper_size');
+    return saved === '58mm' ? '58mm' : '80mm';
+  });
+
+  const handlePaperSizeChange = (size: PaperSize) => {
+    setPaperSize(size);
+    localStorage.setItem('malligai_receipt_paper_size', size);
+  };
+
+  const handlePrintReceipt = () => {
+    window.print();
+  };
 
   // Refs for Focus & Debounce
   const barcodeInputRef = useRef<HTMLInputElement>(null);
@@ -794,6 +808,13 @@ export const BillingPage: React.FC = () => {
                             className={`cart-qty-input font-mono ${!item.isValidQty ? 'cart-qty-input-error' : ''}`}
                             value={item.quantity}
                             onChange={(e) => handleUpdateQuantity(item.productId, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                barcodeInputRef.current?.focus();
+                                barcodeInputRef.current?.select();
+                              }
+                            }}
                             disabled={isSaving}
                             title="Enter quantity (e.g. 1, 2.500)"
                           />
@@ -988,13 +1009,58 @@ export const BillingPage: React.FC = () => {
 
             <div className="modal-footer receipt-modal-footer">
               <div className="receipt-modal-footer-left">
+                <div className="receipt-paper-size-picker">
+                  <span className="paper-size-label">Paper:</span>
+                  <div className="paper-size-buttons" role="radiogroup" aria-label="Receipt Paper Width">
+                    <button
+                      type="button"
+                      className={`btn-paper-size ${paperSize === '80mm' ? 'btn-paper-size-active' : ''}`}
+                      onClick={() => handlePaperSizeChange('80mm')}
+                      role="radio"
+                      aria-checked={paperSize === '80mm'}
+                      title="80mm Standard thermal paper"
+                    >
+                      80mm
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn-paper-size ${paperSize === '58mm' ? 'btn-paper-size-active' : ''}`}
+                      onClick={() => handlePaperSizeChange('58mm')}
+                      role="radio"
+                      aria-checked={paperSize === '58mm'}
+                      title="58mm Compact thermal paper"
+                    >
+                      58mm
+                    </button>
+                  </div>
+                </div>
+
                 <button
                   type="button"
-                  className="btn btn-outline"
-                  onClick={() => navigate(homeRoute)}
+                  className="btn btn-primary btn-print-receipt"
+                  onClick={handlePrintReceipt}
+                  title="Print customer receipt (P)"
                 >
-                  Go to Dashboard
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="6 9 6 2 18 2 18 9" />
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                    <rect x="6" y="14" width="12" height="8" />
+                  </svg>
+                  <span>Print Receipt</span>
                 </button>
+              </div>
+
+              <div className="receipt-modal-footer-right">
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -1003,19 +1069,31 @@ export const BillingPage: React.FC = () => {
                 >
                   View Bill Details →
                 </button>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => navigate(homeRoute)}
+                  title="Return to Dashboard"
+                >
+                  Dashboard
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success btn-new-bill"
+                  onClick={handleStartNewBill}
+                  autoFocus
+                  title="Start a new bill (Enter)"
+                >
+                  + Start New Bill (Enter)
+                </button>
               </div>
-              <button
-                type="button"
-                className="btn btn-primary btn-new-bill"
-                onClick={handleStartNewBill}
-                autoFocus
-              >
-                + Start New Bill (Enter)
-              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Authoritative Printable Thermal Receipt Component */}
+      <PrintableReceipt bill={savedBill} paperSize={paperSize} />
     </div>
   );
 };

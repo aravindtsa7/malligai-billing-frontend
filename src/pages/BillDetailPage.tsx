@@ -5,6 +5,7 @@ import { billingApi } from '../api/billing.api.ts';
 import { getApiErrorMessage } from '../api/api-client.ts';
 import { formatDisplayCurrency } from '../utils/decimal.ts';
 import type { SerializedBill } from '../types/billing.types.ts';
+import { PrintableReceipt, type PaperSize } from '../components/PrintableReceipt.tsx';
 
 export const BillDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,21 @@ export const BillDetailPage: React.FC = () => {
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+
+  // Thermal Receipt Paper Size State
+  const [paperSize, setPaperSize] = useState<PaperSize>(() => {
+    const saved = localStorage.getItem('malligai_receipt_paper_size');
+    return saved === '58mm' ? '58mm' : '80mm';
+  });
+
+  const handlePaperSizeChange = (size: PaperSize) => {
+    setPaperSize(size);
+    localStorage.setItem('malligai_receipt_paper_size', size);
+  };
+
+  const handlePrintReceipt = () => {
+    window.print();
+  };
 
   const homeRoute = user?.role === 'ADMIN' ? '/admin' : '/salesman';
   const isAdmin = user?.role === 'ADMIN';
@@ -162,6 +178,59 @@ export const BillDetailPage: React.FC = () => {
         </div>
 
         <div className="page-header-actions">
+          {bill && (
+            <div className="receipt-paper-size-picker">
+              <span className="paper-size-label">Paper:</span>
+              <div className="paper-size-buttons" role="radiogroup" aria-label="Receipt Paper Width">
+                <button
+                  type="button"
+                  className={`btn-paper-size ${paperSize === '80mm' ? 'btn-paper-size-active' : ''}`}
+                  onClick={() => handlePaperSizeChange('80mm')}
+                  role="radio"
+                  aria-checked={paperSize === '80mm'}
+                  title="80mm Standard thermal receipt"
+                >
+                  80mm
+                </button>
+                <button
+                  type="button"
+                  className={`btn-paper-size ${paperSize === '58mm' ? 'btn-paper-size-active' : ''}`}
+                  onClick={() => handlePaperSizeChange('58mm')}
+                  role="radio"
+                  aria-checked={paperSize === '58mm'}
+                  title="58mm Compact thermal receipt"
+                >
+                  58mm
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-primary btn-print-receipt"
+            onClick={handlePrintReceipt}
+            disabled={loading || !bill || isCancelling}
+            title="Print authoritative receipt snapshot"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect x="6" y="14" width="12" height="8" />
+            </svg>
+            Print Receipt
+          </button>
+
           <button
             type="button"
             className="btn btn-outline"
@@ -588,6 +657,9 @@ export const BillDetailPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Authoritative Printable Thermal Receipt Component */}
+      <PrintableReceipt bill={bill} paperSize={paperSize} />
     </div>
   );
 };

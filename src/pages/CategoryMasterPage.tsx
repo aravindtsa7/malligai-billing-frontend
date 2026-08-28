@@ -102,12 +102,12 @@ export const CategoryMasterPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     if (isSubmitting) return;
     setIsModalOpen(false);
     setEditingCategory(null);
     setFormErrors({});
-  };
+  }, [isSubmitting]);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -204,10 +204,10 @@ export const CategoryMasterPage: React.FC = () => {
     setStatusConfirmCategory(category);
   };
 
-  const handleCloseStatusConfirm = () => {
+  const handleCloseStatusConfirm = useCallback(() => {
     if (isStatusChanging) return;
     setStatusConfirmCategory(null);
-  };
+  }, [isStatusChanging]);
 
   const handleToggleStatus = async () => {
     if (!statusConfirmCategory || isStatusChanging) return;
@@ -232,6 +232,25 @@ export const CategoryMasterPage: React.FC = () => {
       setIsStatusChanging(false);
     }
   };
+
+  // Keyboard Escape listener for modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isModalOpen && !isSubmitting) {
+          handleCloseModal();
+        }
+        if (statusConfirmCategory && !isStatusChanging) {
+          handleCloseStatusConfirm();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isModalOpen, isSubmitting, statusConfirmCategory, isStatusChanging, handleCloseModal, handleCloseStatusConfirm]);
 
   return (
     <div className="category-master-page">

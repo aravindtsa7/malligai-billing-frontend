@@ -187,7 +187,7 @@ export const SalesmanManagementPage: React.FC = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleCloseAddModal = () => {
+  const handleCloseAddModal = useCallback(() => {
     if (isAddSubmitting) return;
     setAddUsername('');
     setAddPassword('');
@@ -196,7 +196,7 @@ export const SalesmanManagementPage: React.FC = () => {
     setShowAddConfirmPassword(false);
     setAddErrors({});
     setIsAddModalOpen(false);
-  };
+  }, [isAddSubmitting]);
 
   const validateAddForm = (): boolean => {
     const errors: AddFormErrors = {};
@@ -274,10 +274,10 @@ export const SalesmanManagementPage: React.FC = () => {
     setStatusConfirmUser(user);
   };
 
-  const handleCloseStatusConfirm = () => {
+  const handleCloseStatusConfirm = useCallback(() => {
     if (isStatusChanging) return;
     setStatusConfirmUser(null);
-  };
+  }, [isStatusChanging]);
 
   const handleToggleStatus = async () => {
     if (!statusConfirmUser || isStatusChanging) return;
@@ -317,7 +317,7 @@ export const SalesmanManagementPage: React.FC = () => {
     setPasswordErrors({});
   };
 
-  const handleClosePasswordReset = () => {
+  const handleClosePasswordReset = useCallback(() => {
     if (isPasswordSubmitting) return;
     setNewPassword('');
     setConfirmNewPassword('');
@@ -325,7 +325,7 @@ export const SalesmanManagementPage: React.FC = () => {
     setShowConfirmNewPassword(false);
     setPasswordErrors({});
     setPasswordResetUser(null);
-  };
+  }, [isPasswordSubmitting]);
 
   const validatePasswordResetForm = (): boolean => {
     const errors: PasswordResetErrors = {};
@@ -378,6 +378,38 @@ export const SalesmanManagementPage: React.FC = () => {
       setIsPasswordSubmitting(false);
     }
   };
+
+  // Keyboard Escape listener for modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isAddModalOpen && !isAddSubmitting) {
+          handleCloseAddModal();
+        }
+        if (statusConfirmUser && !isStatusChanging) {
+          handleCloseStatusConfirm();
+        }
+        if (passwordResetUser && !isPasswordSubmitting) {
+          handleClosePasswordReset();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [
+    isAddModalOpen,
+    isAddSubmitting,
+    statusConfirmUser,
+    isStatusChanging,
+    passwordResetUser,
+    isPasswordSubmitting,
+    handleCloseAddModal,
+    handleCloseStatusConfirm,
+    handleClosePasswordReset,
+  ]);
 
   // =========================================================================
   // Client Filtering (Search by Username)
