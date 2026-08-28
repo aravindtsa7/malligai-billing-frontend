@@ -1,5 +1,6 @@
 import type { Unit } from './product.types.ts';
 import type { Role } from './auth.types.ts';
+import type { ReceiptSnapshot } from './receipt-settings.types.ts';
 
 export type RateType = 'NORMAL' | 'RETAIL' | 'FUNCTION';
 export type PaymentType = 'CASH' | 'UPI';
@@ -25,6 +26,7 @@ export interface SerializedBillItem {
   productId: number;
   productCode: string;
   productName: string;
+  tamilName: string | null;
   unit: Unit;
   quantity: string;
   rateType: RateType;
@@ -50,6 +52,7 @@ export interface SerializedBill {
   createdBy: number;
   cancelledAt?: string | null;
   cancelledBy?: number | null;
+  receiptSnapshot: ReceiptSnapshot;
   createdAt: string;
   updatedAt: string;
   creator?: SerializedBillCreator;

@@ -5,7 +5,11 @@ import { billingApi } from '../api/billing.api.ts';
 import { getApiErrorMessage } from '../api/api-client.ts';
 import { formatDisplayCurrency } from '../utils/decimal.ts';
 import type { SerializedBill } from '../types/billing.types.ts';
-import { PrintableReceipt, type PaperSize } from '../components/PrintableReceipt.tsx';
+import {
+  PrintableReceipt,
+  type PaperSize,
+  type ReceiptLanguage,
+} from '../components/PrintableReceipt.tsx';
 
 export const BillDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,11 +26,12 @@ export const BillDetailPage: React.FC = () => {
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
-  // Thermal Receipt Paper Size State
+  // Thermal Receipt Paper Size & Language State
   const [paperSize, setPaperSize] = useState<PaperSize>(() => {
     const saved = localStorage.getItem('malligai_receipt_paper_size');
     return saved === '58mm' ? '58mm' : '80mm';
   });
+  const [receiptLanguage, setReceiptLanguage] = useState<ReceiptLanguage>('ENGLISH');
 
   const handlePaperSizeChange = (size: PaperSize) => {
     setPaperSize(size);
@@ -36,6 +41,21 @@ export const BillDetailPage: React.FC = () => {
   const handlePrintReceipt = () => {
     window.print();
   };
+
+  // Keyboard shortcut F8: Toggle Receipt Print Language
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F8') {
+        e.preventDefault();
+        setReceiptLanguage((prev) => (prev === 'ENGLISH' ? 'TAMIL' : 'ENGLISH'));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const homeRoute = user?.role === 'ADMIN' ? '/admin' : '/salesman';
   const isAdmin = user?.role === 'ADMIN';
@@ -179,31 +199,59 @@ export const BillDetailPage: React.FC = () => {
 
         <div className="page-header-actions">
           {bill && (
-            <div className="receipt-paper-size-picker">
-              <span className="paper-size-label">Paper:</span>
-              <div className="paper-size-buttons" role="radiogroup" aria-label="Receipt Paper Width">
-                <button
-                  type="button"
-                  className={`btn-paper-size ${paperSize === '80mm' ? 'btn-paper-size-active' : ''}`}
-                  onClick={() => handlePaperSizeChange('80mm')}
-                  role="radio"
-                  aria-checked={paperSize === '80mm'}
-                  title="80mm Standard thermal receipt"
-                >
-                  80mm
-                </button>
-                <button
-                  type="button"
-                  className={`btn-paper-size ${paperSize === '58mm' ? 'btn-paper-size-active' : ''}`}
-                  onClick={() => handlePaperSizeChange('58mm')}
-                  role="radio"
-                  aria-checked={paperSize === '58mm'}
-                  title="58mm Compact thermal receipt"
-                >
-                  58mm
-                </button>
+            <>
+              <div className="receipt-paper-size-picker">
+                <span className="paper-size-label">Paper:</span>
+                <div className="paper-size-buttons" role="radiogroup" aria-label="Receipt Paper Width">
+                  <button
+                    type="button"
+                    className={`btn-paper-size ${paperSize === '80mm' ? 'btn-paper-size-active' : ''}`}
+                    onClick={() => handlePaperSizeChange('80mm')}
+                    role="radio"
+                    aria-checked={paperSize === '80mm'}
+                    title="80mm Standard thermal receipt"
+                  >
+                    80mm
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn-paper-size ${paperSize === '58mm' ? 'btn-paper-size-active' : ''}`}
+                    onClick={() => handlePaperSizeChange('58mm')}
+                    role="radio"
+                    aria-checked={paperSize === '58mm'}
+                    title="58mm Compact thermal receipt"
+                  >
+                    58mm
+                  </button>
+                </div>
               </div>
-            </div>
+
+              <div className="receipt-lang-picker">
+                <span className="paper-size-label">Lang:</span>
+                <div className="paper-size-buttons" role="radiogroup" aria-label="Receipt Language">
+                  <button
+                    type="button"
+                    className={`btn-paper-size ${receiptLanguage === 'ENGLISH' ? 'btn-paper-size-active' : ''}`}
+                    onClick={() => setReceiptLanguage('ENGLISH')}
+                    role="radio"
+                    aria-checked={receiptLanguage === 'ENGLISH'}
+                    title="Print English Receipt (F8 to toggle)"
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn-paper-size ${receiptLanguage === 'TAMIL' ? 'btn-paper-size-active' : ''}`}
+                    onClick={() => setReceiptLanguage('TAMIL')}
+                    role="radio"
+                    aria-checked={receiptLanguage === 'TAMIL'}
+                    title="Print Tamil Receipt (F8 to toggle)"
+                  >
+                    தமிழ்
+                  </button>
+                </div>
+              </div>
+            </>
           )}
 
           <button
@@ -659,7 +707,7 @@ export const BillDetailPage: React.FC = () => {
       )}
 
       {/* Authoritative Printable Thermal Receipt Component */}
-      <PrintableReceipt bill={bill} paperSize={paperSize} />
+      <PrintableReceipt bill={bill} paperSize={paperSize} language={receiptLanguage} />
     </div>
   );
 };

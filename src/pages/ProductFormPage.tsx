@@ -13,6 +13,7 @@ interface FormData {
   tamilName: string;
   categoryId: string;
   unit: Unit;
+  mrpRate: string;
   originalRate: string;
   normalRate: string;
   retailRate: string;
@@ -27,6 +28,7 @@ interface FormErrors {
   productName?: string;
   categoryId?: string;
   unit?: string;
+  mrpRate?: string;
   originalRate?: string;
   normalRate?: string;
   retailRate?: string;
@@ -48,10 +50,11 @@ export const ProductFormPage: React.FC = () => {
     tamilName: '',
     categoryId: '',
     unit: 'PIECE',
-    originalRate: '0.00',
-    normalRate: '0.00',
-    retailRate: '0.00',
-    functionRate: '0.00',
+    mrpRate: '',
+    originalRate: '',
+    normalRate: '',
+    retailRate: '',
+    functionRate: '',
     openingStock: '0.000',
     currentStock: '0.000',
     active: true,
@@ -107,6 +110,7 @@ export const ProductFormPage: React.FC = () => {
             tamilName: product.tamilName || '',
             categoryId: String(product.categoryId),
             unit: product.unit,
+            mrpRate: product.mrpRate,
             originalRate: product.originalRate,
             normalRate: product.normalRate,
             retailRate: product.retailRate,
@@ -173,10 +177,16 @@ export const ProductFormPage: React.FC = () => {
     if (name === 'categoryId') {
       if (!value.trim() || Number(value) <= 0) return 'Category is required';
     }
-    if (['originalRate', 'normalRate', 'retailRate', 'functionRate'].includes(name)) {
+    if (name === 'mrpRate' || name === 'normalRate') {
       if (!value.trim()) return 'Rate is required';
       const num = Number(value);
       if (isNaN(num) || num < 0) return 'Must be a valid non-negative number';
+    }
+    if (['originalRate', 'retailRate', 'functionRate'].includes(name)) {
+      if (value.trim()) {
+        const num = Number(value);
+        if (isNaN(num) || num < 0) return 'Must be a valid non-negative number';
+      }
     }
     if (name === 'openingStock' && !isEditMode) {
       if (value.trim()) {
@@ -218,11 +228,14 @@ export const ProductFormPage: React.FC = () => {
     const catErr = validateField('categoryId', formData.categoryId);
     if (catErr) newErrors.categoryId = catErr;
 
-    const origErr = validateField('originalRate', formData.originalRate);
-    if (origErr) newErrors.originalRate = origErr;
+    const mrpErr = validateField('mrpRate', formData.mrpRate);
+    if (mrpErr) newErrors.mrpRate = mrpErr;
 
     const normErr = validateField('normalRate', formData.normalRate);
     if (normErr) newErrors.normalRate = normErr;
+
+    const origErr = validateField('originalRate', formData.originalRate);
+    if (origErr) newErrors.originalRate = origErr;
 
     const retErr = validateField('retailRate', formData.retailRate);
     if (retErr) newErrors.retailRate = retErr;
@@ -272,10 +285,11 @@ export const ProductFormPage: React.FC = () => {
           tamilName: formData.tamilName.trim() || null,
           ...(hasCategoryChanged ? { categoryId: selectedCatIdNum } : {}),
           unit: formData.unit,
-          originalRate: formData.originalRate.trim(),
+          mrpRate: formData.mrpRate.trim(),
           normalRate: formData.normalRate.trim(),
-          retailRate: formData.retailRate.trim(),
-          functionRate: formData.functionRate.trim(),
+          originalRate: formData.originalRate.trim() === '' ? null : formData.originalRate.trim(),
+          retailRate: formData.retailRate.trim() === '' ? null : formData.retailRate.trim(),
+          functionRate: formData.functionRate.trim() === '' ? null : formData.functionRate.trim(),
           active: formData.active,
         };
 
@@ -293,10 +307,11 @@ export const ProductFormPage: React.FC = () => {
           tamilName: formData.tamilName.trim() || null,
           categoryId: Number(formData.categoryId),
           unit: formData.unit,
-          originalRate: formData.originalRate.trim() || '0',
-          normalRate: formData.normalRate.trim() || '0',
-          retailRate: formData.retailRate.trim() || '0',
-          functionRate: formData.functionRate.trim() || '0',
+          mrpRate: formData.mrpRate.trim(),
+          normalRate: formData.normalRate.trim(),
+          ...(formData.originalRate.trim() ? { originalRate: formData.originalRate.trim() } : {}),
+          ...(formData.retailRate.trim() ? { retailRate: formData.retailRate.trim() } : {}),
+          ...(formData.functionRate.trim() ? { functionRate: formData.functionRate.trim() } : {}),
           openingStock: formData.openingStock.trim() || '0',
         };
 
@@ -551,39 +566,39 @@ export const ProductFormPage: React.FC = () => {
             <div className="section-step-badge">2</div>
             <div>
               <h3 className="form-card-title">Pricing & Rates</h3>
-              <span className="form-card-desc">Cost price and customer-specific selling rate categories</span>
+              <span className="form-card-desc">MRP, default counter selling rate, and optional tier rates</span>
             </div>
           </div>
 
           <div className="rates-notice">
             <div className="notice-item">
-              <strong>Cost Price:</strong> Shop purchase / cost price (Not used in billing calculation).
+              <strong>Mandatory Rates:</strong> MRP Rate and Normal Selling Rate are required for all products.
             </div>
             <div className="notice-item">
-              <strong>Selling Rates:</strong> Normal (standard customers), Retail (special select customers), Function (bulk orders).
+              <strong>Optional Rates:</strong> Original / Cost Rate defaults to 0.00 if left blank. Retail and Function rates default to the Normal Selling Rate if left blank.
             </div>
           </div>
 
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor="originalRate">
-                Original / Cost Rate (₹) <span className="required-star">*</span>
+              <label htmlFor="mrpRate">
+                MRP Rate (₹) <span className="required-star">*</span>
               </label>
               <div className="input-prefix-wrapper">
                 <span className="input-prefix">₹</span>
                 <input
-                  id="originalRate"
-                  name="originalRate"
+                  id="mrpRate"
+                  name="mrpRate"
                   type="text"
-                  className={`form-input font-mono input-with-prefix ${errors.originalRate ? 'input-error' : ''}`}
+                  className={`form-input font-mono input-with-prefix ${errors.mrpRate ? 'input-error' : ''}`}
                   placeholder="0.00"
-                  value={formData.originalRate}
+                  value={formData.mrpRate}
                   onChange={handleChange}
                   disabled={isSubmitting}
                 />
               </div>
-              {errors.originalRate && <span className="field-error">{errors.originalRate}</span>}
-              <span className="form-help-text">Purchase / cost price per {formData.unit}</span>
+              {errors.mrpRate && <span className="field-error">{errors.mrpRate}</span>}
+              <span className="form-help-text">Maximum Retail Price printed on package</span>
             </div>
 
             <div className="form-group">
@@ -608,8 +623,29 @@ export const ProductFormPage: React.FC = () => {
             </div>
 
             <div className="form-group">
+              <label htmlFor="originalRate">
+                Original / Cost Rate (₹)
+              </label>
+              <div className="input-prefix-wrapper">
+                <span className="input-prefix">₹</span>
+                <input
+                  id="originalRate"
+                  name="originalRate"
+                  type="text"
+                  className={`form-input font-mono input-with-prefix ${errors.originalRate ? 'input-error' : ''}`}
+                  placeholder="0.00"
+                  value={formData.originalRate}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                />
+              </div>
+              {errors.originalRate && <span className="field-error">{errors.originalRate}</span>}
+              <span className="form-help-text">Purchase / cost price per {formData.unit} (defaults to 0.00)</span>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="retailRate">
-                Retail Selling Rate (₹) <span className="required-star">*</span>
+                Retail Selling Rate (₹)
               </label>
               <div className="input-prefix-wrapper">
                 <span className="input-prefix">₹</span>
@@ -625,12 +661,12 @@ export const ProductFormPage: React.FC = () => {
                 />
               </div>
               {errors.retailRate && <span className="field-error">{errors.retailRate}</span>}
-              <span className="form-help-text">Special discounted price for retail customers</span>
+              <span className="form-help-text">Discounted retail rate (defaults to Normal rate)</span>
             </div>
 
             <div className="form-group">
               <label htmlFor="functionRate">
-                Function / Bulk Rate (₹) <span className="required-star">*</span>
+                Function / Bulk Rate (₹)
               </label>
               <div className="input-prefix-wrapper">
                 <span className="input-prefix">₹</span>
@@ -646,7 +682,7 @@ export const ProductFormPage: React.FC = () => {
                 />
               </div>
               {errors.functionRate && <span className="field-error">{errors.functionRate}</span>}
-              <span className="form-help-text">Bulk rate for functions, weddings & institutions</span>
+              <span className="form-help-text">Bulk rate for functions & orders (defaults to Normal rate)</span>
             </div>
           </div>
         </div>

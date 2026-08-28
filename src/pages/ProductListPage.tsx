@@ -410,6 +410,7 @@ export const ProductListPage: React.FC = () => {
                     <th className="th-tamil">Tamil Name</th>
                     {selectedCategoryId === null && <th className="th-category">Category</th>}
                     <th className="th-unit">Unit</th>
+                    <th className="th-rate text-right" title="Maximum Retail Price">MRP</th>
                     <th className="th-rate text-right" title="Cost / Purchase price (Not for billing)">Cost</th>
                     <th className="th-rate text-right" title="Normal Selling Rate">Normal</th>
                     <th className="th-rate text-right" title="Retail Customer Rate">Retail</th>
@@ -441,6 +442,7 @@ export const ProductListPage: React.FC = () => {
                       <td className="td-unit">
                         <span className="unit-badge">{product.unit}</span>
                       </td>
+                      <td className="td-rate text-right font-mono font-semibold">₹{product.mrpRate}</td>
                       <td className="td-rate text-right font-mono text-cost">₹{product.originalRate}</td>
                       <td className="td-rate text-right font-mono font-semibold">₹{product.normalRate}</td>
                       <td className="td-rate text-right font-mono">₹{product.retailRate}</td>

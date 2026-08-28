@@ -2760,6 +2760,245 @@ body {
   border-color: var(--success-hover);
 }
 
+/* Cart Header Actions Button Group */
+.cart-header-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-review-cart {
+  font-weight: 600;
+  color: var(--primary);
+  border-color: var(--primary-border);
+  background-color: var(--primary-light);
+}
+
+.btn-review-cart:hover:not(:disabled) {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* Last Scanned Item Highlight */
+.row-last-scanned {
+  background-color: #eff6ff !important;
+  border-left: 3px solid var(--primary);
+}
+
+/* Out of Stock Indicators */
+.stock-out-tag {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  text-transform: uppercase;
+}
+
+.row-out-of-stock {
+  opacity: 0.72;
+}
+
+.text-danger {
+  color: var(--danger, #dc2626) !important;
+}
+
+/* ==========================================================================
+   F6 Cart Review Modal Styles
+   ========================================================================== */
+.modal-review-dialog {
+  max-width: 800px;
+  width: 90%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-modal-header {
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  padding: 14px 20px;
+}
+
+.review-modal-title-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid var(--border-default);
+  flex-wrap: wrap;
+}
+
+.review-summary-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.review-summary-stat .stat-label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.review-summary-stat .stat-value {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.review-summary-total {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.review-summary-total .stat-label {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.review-summary-total .stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.review-table-container {
+  max-height: calc(88vh - 220px);
+  min-height: 200px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.review-cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.review-cart-table th {
+  position: sticky;
+  top: 0;
+  background-color: #f1f5f9;
+  z-index: 1;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.review-table-row {
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.review-table-row:hover {
+  background-color: #f8fafc;
+}
+
+.review-row-selected {
+  background-color: #e0f2fe !important;
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.review-table-row td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.review-item-name-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-item-title {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.review-item-tamil {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.review-item-code {
+  font-size: 11px;
+}
+
+.review-qty-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.review-row-selected .review-qty-badge {
+  border-color: var(--primary);
+  background-color: #ffffff;
+}
+
+.review-qty-inline-input {
+  max-width: 90px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 6px;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.review-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background-color: #f8fafc;
+  border-top: 1px solid var(--border-default);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.review-footer-hints {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.review-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-review-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  padding: 8px 18px;
+}
+
 /* --------------------------------------------------------------------------
    Bill History Page
    -------------------------------------------------------------------------- */
@@ -3444,6 +3683,113 @@ body {
 }
 
 /* ==========================================================================
+   Receipt Settings Screen Styles
+   ========================================================================== */
+.receipt-settings-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.receipt-settings-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.receipt-flags-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.receipt-flag-item {
+  background: var(--color-bg-secondary, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 14px 16px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.receipt-flag-item:hover {
+  border-color: var(--color-primary-light, #93c5fd);
+  background: #ffffff;
+}
+
+.receipt-flag-item .toggle-switch-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+}
+
+.receipt-flag-item .switch-checkbox {
+  margin-top: 2px;
+}
+
+.flag-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flag-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-primary, #0f172a);
+}
+
+.flag-desc {
+  font-size: 12px;
+  color: var(--color-text-muted, #64748b);
+  line-height: 1.4;
+}
+
+/* Language Picker Button Group */
+.receipt-lang-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-picker-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+}
+
+.lang-buttons {
+  display: inline-flex;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-bg-secondary, #f1f5f9);
+  padding: 2px;
+  border: 1px solid var(--color-border, #cbd5e1);
+}
+
+.btn-lang {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted, #475569);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-lang:hover {
+  color: var(--color-text-primary, #0f172a);
+}
+
+.btn-lang-active {
+  background: var(--color-primary, #2563eb);
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
    Thermal Receipt Printing Styles (58mm & 80mm Modes)
    ========================================================================== */
 
@@ -3468,6 +3814,14 @@ body {
   text-transform: uppercase;
   color: #000000;
   line-height: 1.2;
+}
+
+.receipt-shop-upi,
+.receipt-shop-gstin {
+  font-size: 10.5px;
+  color: #000000;
+  margin: 0 0 2px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Liberation Mono', Menlo, Monaco, Consolas, monospace;
 }
 
 .receipt-shop-subtitle {
@@ -3525,7 +3879,7 @@ body {
   color: #000000;
 }
 
-/* 80mm Table Layout */
+/* 80mm Table Layout (4 Columns: Item Name | Rate | Qty | Amount) */
 .receipt-table-80mm {
   width: 100%;
   border-collapse: collapse;
@@ -3538,7 +3892,7 @@ body {
   border-bottom: 1px solid #000000;
   padding: 3px 2px;
   font-weight: 700;
-  font-size: 10.5px;
+  font-size: 10px;
   text-transform: uppercase;
   color: #000000;
 }
@@ -3549,25 +3903,30 @@ body {
   color: #000000;
 }
 
-.th-r-sno, .td-r-sno {
-  width: 16px;
-  color: #000000;
+.th-r-name, .td-r-name {
+  width: 48%;
+  word-break: break-word;
 }
 
-.th-r-item, .td-r-item {
-  word-break: break-word;
+.th-r-rate, .td-r-rate {
+  width: 16%;
+  white-space: nowrap;
+}
+
+.th-r-qty, .td-r-qty {
+  width: 18%;
+  white-space: nowrap;
+}
+
+.th-r-amount, .td-r-amount {
+  width: 18%;
+  white-space: nowrap;
 }
 
 .receipt-item-name-text {
   font-weight: 600;
   line-height: 1.25;
   color: #000000;
-}
-
-.receipt-item-code-text {
-  font-size: 9.5px;
-  font-family: var(--font-mono), monospace;
-  color: #333333;
 }
 
 /* 58mm Narrow Stacked Layout */
@@ -3583,7 +3942,7 @@ body {
   display: flex;
   justify-content: space-between;
   font-weight: 700;
-  font-size: 10px;
+  font-size: 9.5px;
   text-transform: uppercase;
   color: #000000;
 }
@@ -3595,13 +3954,6 @@ body {
   margin-bottom: 2px;
 }
 
-.receipt-58mm-item-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 4px;
-}
-
 .receipt-58mm-item-name {
   font-weight: 600;
   line-height: 1.2;
@@ -3609,19 +3961,26 @@ body {
   color: #000000;
 }
 
-.receipt-58mm-item-amount {
-  font-weight: 700;
-  text-align: right;
-  white-space: nowrap;
+.receipt-58mm-item-details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 10px;
+  padding-left: 6px;
   color: #000000;
 }
 
-.receipt-58mm-item-sub-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9.5px;
-  padding-left: 10px;
+.receipt-58mm-rate {
   color: #222222;
+}
+
+.receipt-58mm-qty {
+  color: #222222;
+}
+
+.receipt-58mm-amount {
+  color: #000000;
+  font-weight: 700;
 }
 
 /* Totals Section */
@@ -3647,6 +4006,11 @@ body {
   font-size: 13.5px;
   font-weight: 800;
   padding-top: 2px;
+  color: #000000;
+}
+
+.receipt-grand-total-label {
+  font-weight: 800;
   color: #000000;
 }
 

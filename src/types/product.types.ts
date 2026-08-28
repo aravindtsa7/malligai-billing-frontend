@@ -13,6 +13,7 @@ export interface Product {
   categoryId: number;
   category?: SerializedCategoryRef;
   unit: Unit;
+  mrpRate: string;
   originalRate: string;
   normalRate: string;
   retailRate: string;
@@ -30,8 +31,9 @@ export interface CreateProductInput {
   tamilName?: string | null;
   categoryId: number;
   unit: Unit;
+  mrpRate: string;
+  normalRate: string;
   originalRate?: string;
-  normalRate?: string;
   retailRate?: string;
   functionRate?: string;
   openingStock?: string;
@@ -44,10 +46,11 @@ export interface UpdateProductInput {
   tamilName?: string | null;
   categoryId?: number;
   unit?: Unit;
-  originalRate?: string;
+  mrpRate?: string;
   normalRate?: string;
-  retailRate?: string;
-  functionRate?: string;
+  originalRate?: string | null;
+  retailRate?: string | null;
+  functionRate?: string | null;
   active?: boolean;
 }
 

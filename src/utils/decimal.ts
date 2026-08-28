@@ -150,3 +150,50 @@ export function formatDisplayCurrency(amount: string): string {
   return `₹${formattedWhole}.${fracPart}`;
 }
 
+/**
+ * Compares two decimal quantity strings using exact BigInt millis (3 decimal scale).
+ * Returns:
+ *   -1 if qtyA < qtyB
+ *    0 if qtyA === qtyB
+ *    1 if qtyA > qtyB
+ */
+export function compareQuantities(qtyA: string, qtyB: string): number {
+  const aMillis = parseToScaledBigInt(qtyA || '0', QTY_DECIMALS);
+  const bMillis = parseToScaledBigInt(qtyB || '0', QTY_DECIMALS);
+  if (aMillis < bMillis) return -1;
+  if (aMillis > bMillis) return 1;
+  return 0;
+}
+
+/**
+ * Checks if stock is strictly positive (> 0) using exact scaled BigInt.
+ */
+export function isStockAvailable(stockStr: string | undefined | null): boolean {
+  if (!stockStr) return false;
+  const millis = parseToScaledBigInt(stockStr, QTY_DECIMALS);
+  return millis > 0n;
+}
+
+/**
+ * Checks if requested quantity is valid and within available stock (0 < requestedQty <= stock)
+ * using exact scaled BigInt arithmetic.
+ */
+export function isQuantityWithinStock(requestedQty: string, stockStr: string | undefined | null): boolean {
+  if (!stockStr || !isValidPositiveDecimal(requestedQty)) return false;
+  const reqMillis = parseToScaledBigInt(requestedQty, QTY_DECIMALS);
+  const stockMillis = parseToScaledBigInt(stockStr, QTY_DECIMALS);
+  return reqMillis > 0n && reqMillis <= stockMillis;
+}
+
+/**
+ * Formats quantity string cleanly for user-facing display messages.
+ * e.g. "3.000" -> "3", "2.500" -> "2.5", "0.250" -> "0.25"
+ */
+export function formatDisplayQuantity(qtyStr: string | undefined | null): string {
+  if (!qtyStr) return '0';
+  const clean = String(qtyStr).trim();
+  const parts = clean.split('.');
+  const wholePart = parts[0] || '0';
+  const fracPart = (parts[1] || '').replace(/0+$/, '');
+  return fracPart ? `${wholePart}.${fracPart}` : wholePart;
+}

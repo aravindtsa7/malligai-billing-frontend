@@ -114,6 +114,23 @@ const ADMIN_MODULES: DashboardModule[] = [
       </svg>
     ),
   },
+  {
+    id: 'receipt-settings',
+    code: 'SET-07',
+    title: 'Receipt Settings',
+    description: 'Configure store name, UPI, GSTIN, and receipt metadata visibility flags.',
+    status: 'Active',
+    route: '/admin/receipt-settings',
+    buttonLabel: 'Receipt Settings →',
+    iconSvg: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+        <line x1="8" y1="16" x2="16" y2="16" />
+        <line x1="8" y1="8" x2="10" y2="8" />
+      </svg>
+    ),
+  },
 ];
 
 export const AdminDashboardPage: React.FC = () => {
