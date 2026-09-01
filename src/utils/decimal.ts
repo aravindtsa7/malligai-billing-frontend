@@ -186,14 +186,21 @@ export function isQuantityWithinStock(requestedQty: string, stockStr: string | u
 }
 
 /**
- * Formats quantity string cleanly for user-facing display messages.
- * e.g. "3.000" -> "3", "2.500" -> "2.5", "0.250" -> "0.25"
+ * Formats a quantity (string or number, up to 3 decimals) cleanly for
+ * user-facing display: trims trailing zeros without changing the value.
+ * e.g. "97.000" -> "97", "2.500" -> "2.5", "0.125" -> "0.125"
+ *
+ * Not for money — money always keeps its fixed 2-decimal format.
  */
-export function formatDisplayQuantity(qtyStr: string | undefined | null): string {
-  if (!qtyStr) return '0';
-  const clean = String(qtyStr).trim();
-  const parts = clean.split('.');
+export function formatQuantity(qty: string | number | undefined | null): string {
+  if (qty === undefined || qty === null || qty === '') return '0';
+  const clean = String(qty).trim();
+  if (!clean || Number.isNaN(Number(clean))) return '0';
+  const isNegative = clean.startsWith('-');
+  const unsigned = isNegative ? clean.slice(1) : clean;
+  const parts = unsigned.split('.');
   const wholePart = parts[0] || '0';
   const fracPart = (parts[1] || '').replace(/0+$/, '');
-  return fracPart ? `${wholePart}.${fracPart}` : wholePart;
+  const formatted = fracPart ? `${wholePart}.${fracPart}` : wholePart;
+  return isNegative && formatted !== '0' ? `-${formatted}` : formatted;
 }

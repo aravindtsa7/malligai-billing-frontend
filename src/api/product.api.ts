@@ -42,6 +42,11 @@ export const productApi = {
     return response.data.data.product;
   },
 
+  getProductByScanValue: async (value: string): Promise<Product> => {
+    const response = await apiClient.get<ProductSingleResponse>(`/products/scan/${encodeURIComponent(value.trim())}`);
+    return response.data.data.product;
+  },
+
   createProduct: async (payload: CreateProductInput): Promise<Product> => {
     const response = await apiClient.post<ProductSingleResponse>('/products', payload);
     return response.data.data.product;

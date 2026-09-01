@@ -16,6 +16,7 @@ import { BillHistoryPage } from './pages/BillHistoryPage.tsx';
 import { BillDetailPage } from './pages/BillDetailPage.tsx';
 import { SalesmanManagementPage } from './pages/SalesmanManagementPage.tsx';
 import { ReceiptSettingsPage } from './pages/ReceiptSettingsPage.tsx';
+import { LabelPrintingPage } from './pages/LabelPrintingPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 
 const RootRedirect: React.FC = () => {
@@ -64,6 +65,7 @@ export const App: React.FC = () => {
               <Route path="/admin/stock" element={<StockManagementPage />} />
               <Route path="/admin/salesmen" element={<SalesmanManagementPage />} />
               <Route path="/admin/receipt-settings" element={<ReceiptSettingsPage />} />
+              <Route path="/admin/label-printing" element={<LabelPrintingPage />} />
             </Route>
           </Route>
 

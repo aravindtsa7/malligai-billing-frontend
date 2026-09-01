@@ -4,6 +4,7 @@ import { productApi } from '../api/product.api.ts';
 import { categoryApi } from '../api/category.api.ts';
 import { stockApi } from '../api/stock.api.ts';
 import { getApiErrorMessage } from '../api/api-client.ts';
+import { formatQuantity } from '../utils/decimal.ts';
 import type { Product } from '../types/product.types.ts';
 import type { Category } from '../types/category.types.ts';
 import type { StockAdjustmentType } from '../types/stock.types.ts';
@@ -323,7 +324,7 @@ export const StockManagementPage: React.FC = () => {
       );
 
       triggerSuccessMessage(
-        `Stock in recorded successfully for "${result.product.productName}". Added: +${result.transaction.quantity} ${result.product.unit} (New Stock: ${result.product.currentStock} ${result.product.unit}).`
+        `Stock in recorded successfully for "${result.product.productName}". Added: +${formatQuantity(result.transaction.quantity)} ${result.product.unit} (New Stock: ${formatQuantity(result.product.currentStock)} ${result.product.unit}).`
       );
 
       setStockInProduct(null);
@@ -421,7 +422,7 @@ export const StockManagementPage: React.FC = () => {
         result.transaction.type === 'ADJUSTMENT_IN' ? 'Adjustment In' : 'Adjustment Out';
 
       triggerSuccessMessage(
-        `${typeLabel} recorded successfully for "${result.product.productName}". Adjusted: ${sign}${result.transaction.quantity} ${result.product.unit} (New Stock: ${result.product.currentStock} ${result.product.unit}).`
+        `${typeLabel} recorded successfully for "${result.product.productName}". Adjusted: ${sign}${formatQuantity(result.transaction.quantity)} ${result.product.unit} (New Stock: ${formatQuantity(result.product.currentStock)} ${result.product.unit}).`
       );
 
       setAdjustmentProduct(null);
@@ -430,7 +431,7 @@ export const StockManagementPage: React.FC = () => {
       // Present clear message if backend rejects due to insufficient stock
       if (msg.toLowerCase().includes('insufficient stock')) {
         setAdjustmentErrors({
-          general: 'Adjustment quantity exceeds current stock. Cannot reduce stock below 0.000.',
+          general: 'Adjustment quantity exceeds current stock. Cannot reduce stock below 0.',
         });
       } else {
         setAdjustmentErrors({ general: msg });
@@ -753,7 +754,7 @@ export const StockManagementPage: React.FC = () => {
                       </td>
                       <td className="td-stock text-right font-mono">
                         <span className="stock-highlight-value">
-                          {product.currentStock}{' '}
+                          {formatQuantity(product.currentStock)}{' '}
                           <span className="stock-unit">{product.unit}</span>
                         </span>
                       </td>
@@ -897,7 +898,7 @@ export const StockManagementPage: React.FC = () => {
                     <div className="modal-summary-item modal-summary-stock-item">
                       <span className="modal-summary-label">Current Stock on Hand</span>
                       <span className="modal-summary-stock-val font-mono font-semibold">
-                        {stockInProduct.currentStock}{' '}
+                        {formatQuantity(stockInProduct.currentStock)}{' '}
                         <span className="stock-unit">{stockInProduct.unit}</span>
                       </span>
                     </div>
@@ -1049,7 +1050,7 @@ export const StockManagementPage: React.FC = () => {
                     <div className="modal-summary-item modal-summary-stock-item">
                       <span className="modal-summary-label">Current Stock on Hand</span>
                       <span className="modal-summary-stock-val font-mono font-semibold">
-                        {adjustmentProduct.currentStock}{' '}
+                        {formatQuantity(adjustmentProduct.currentStock)}{' '}
                         <span className="stock-unit">{adjustmentProduct.unit}</span>
                       </span>
                     </div>

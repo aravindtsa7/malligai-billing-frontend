@@ -28,7 +28,7 @@ import {
   formatScaledBigInt,
   isStockAvailable,
   isQuantityWithinStock,
-  formatDisplayQuantity,
+  formatQuantity,
 } from '../utils/decimal.ts';
 import {
   PrintableReceipt,
@@ -77,7 +77,7 @@ export const BillingPage: React.FC = () => {
   const [savedBill, setSavedBill] = useState<SerializedBill | null>(null);
   const [paperSize, setPaperSize] = useState<PaperSize>(() => {
     const saved = localStorage.getItem('malligai_receipt_paper_size');
-    return saved === '58mm' ? '58mm' : '80mm';
+    return saved === '58mm' ? '58mm' : '77mm';
   });
   const [receiptLanguage, setReceiptLanguage] = useState<ReceiptLanguage>('ENGLISH');
 
@@ -262,7 +262,7 @@ export const BillingPage: React.FC = () => {
     if (!isQuantityWithinStock(nextQty, product.currentStock)) {
       showBarcodeFeedback(
         'error',
-        `Only ${formatDisplayQuantity(product.currentStock)} ${product.unit} available in stock for "${product.productName}".`
+        `Only ${formatQuantity(product.currentStock)} ${product.unit} available in stock for "${product.productName}".`
       );
       focusBarcodeInput();
       return false;
@@ -330,9 +330,9 @@ export const BillingPage: React.FC = () => {
     barcodeQueueRef.current = barcodeQueueRef.current
       .then(async () => {
         try {
-          const product = await productApi.getProductByBarcode(barcode);
+          const product = await productApi.getProductByScanValue(barcode);
           if (!product) {
-            showBarcodeFeedback('error', `Barcode "${barcode}" not found.`);
+            showBarcodeFeedback('error', `Scan value "${barcode}" not found.`);
           } else if (!product.active) {
             showBarcodeFeedback('error', `Product "${product.productName}" is inactive and cannot be billed.`);
           } else if (!isStockAvailable(product.currentStock)) {
@@ -344,7 +344,7 @@ export const BillingPage: React.FC = () => {
             }
           }
         } catch (err: unknown) {
-          const msg = getApiErrorMessage(err, `Barcode "${barcode}" not found in catalog.`);
+          const msg = getApiErrorMessage(err, `Scan value "${barcode}" not found in catalog.`);
           showBarcodeFeedback('error', msg);
         } finally {
           setBarcodeLoading(false);
@@ -404,7 +404,7 @@ export const BillingPage: React.FC = () => {
       if (!isQuantityWithinStock(nextQty, target.currentStock)) {
         showBarcodeFeedback(
           'error',
-          `Only ${formatDisplayQuantity(target.currentStock)} ${target.unit} available in stock for "${target.productName}".`
+          `Only ${formatQuantity(target.currentStock)} ${target.unit} available in stock for "${target.productName}".`
         );
         return;
       }
@@ -470,7 +470,7 @@ export const BillingPage: React.FC = () => {
     if (!isQuantityWithinStock(trimmed, target.currentStock)) {
       showBarcodeFeedback(
         'error',
-        `Only ${formatDisplayQuantity(target.currentStock)} ${target.unit} available in stock for "${target.productName}".`
+        `Only ${formatQuantity(target.currentStock)} ${target.unit} available in stock for "${target.productName}".`
       );
       // Reject: leave original cart quantity unchanged
       reviewEditingProductIdRef.current = null;
@@ -847,7 +847,7 @@ export const BillingPage: React.FC = () => {
               ref={barcodeInputRef}
               type="text"
               className="barcode-input"
-              placeholder="Scan Barcode or Type Code & Press Enter (F2)..."
+              placeholder="Scan Barcode / Product Code & Press Enter (F2)..."
               value={barcodeInput}
               onChange={(e) => setBarcodeInput(e.target.value)}
               disabled={isSaving || showReviewModal}
@@ -1047,7 +1047,7 @@ export const BillingPage: React.FC = () => {
                           {!hasStock ? (
                             <span className="text-danger font-semibold">0 <span className="stock-unit">{product.unit}</span></span>
                           ) : (
-                            <span>{product.currentStock} <span className="stock-unit">{product.unit}</span></span>
+                            <span>{formatQuantity(product.currentStock)} <span className="stock-unit">{product.unit}</span></span>
                           )}
                         </td>
                         <td className="td-action text-center" onClick={(e) => e.stopPropagation()}>
@@ -1155,7 +1155,7 @@ export const BillingPage: React.FC = () => {
                           <div className="cart-item-meta">
                             <span className="cart-item-code font-mono">{item.productCode}</span>
                             <span className="cart-stock-hint">
-                              Stock: {item.currentStock} {item.unit}
+                              Stock: {formatQuantity(item.currentStock)} {item.unit}
                             </span>
                           </div>
                         </div>
@@ -1204,7 +1204,7 @@ export const BillingPage: React.FC = () => {
                                   handleUpdateQuantity(item.productId, prev);
                                   showBarcodeFeedback(
                                     'error',
-                                    `Only ${formatDisplayQuantity(item.currentStock)} ${item.unit} available in stock for "${item.productName}".`
+                                    `Only ${formatQuantity(item.currentStock)} ${item.unit} available in stock for "${item.productName}".`
                                   );
                                 } else {
                                   e.currentTarget.dataset.originalQty = trimmed;
@@ -1243,7 +1243,7 @@ export const BillingPage: React.FC = () => {
                         {!item.isValidQty && (
                           <div className="cart-qty-error-msg">
                             {item.isExceedingStock
-                              ? `Exceeds stock (${formatDisplayQuantity(item.currentStock)} ${item.unit})`
+                              ? `Exceeds stock (${formatQuantity(item.currentStock)} ${item.unit})`
                               : 'Invalid Qty'}
                           </div>
                         )}
@@ -1431,7 +1431,7 @@ export const BillingPage: React.FC = () => {
                               }}
                               title="Click or press Enter to edit quantity"
                             >
-                              {item.quantity} {item.unit}
+                              {formatQuantity(item.quantity)} {item.unit}
                             </div>
                           )}
                         </td>
@@ -1576,7 +1576,7 @@ export const BillingPage: React.FC = () => {
                           <div className="receipt-item-code font-mono text-muted">{item.productCode}</div>
                         </td>
                         <td className="text-center font-mono">
-                          {item.quantity} {item.unit}
+                          {formatQuantity(item.quantity)} {item.unit}
                         </td>
                         <td className="text-right font-mono">₹{item.rate}</td>
                         <td className="text-right font-mono font-semibold">₹{item.amount}</td>
@@ -1608,13 +1608,13 @@ export const BillingPage: React.FC = () => {
                   <div className="paper-size-buttons" role="radiogroup" aria-label="Receipt Paper Width">
                     <button
                       type="button"
-                      className={`btn-paper-size ${paperSize === '80mm' ? 'btn-paper-size-active' : ''}`}
-                      onClick={() => handlePaperSizeChange('80mm')}
+                      className={`btn-paper-size ${paperSize === '77mm' ? 'btn-paper-size-active' : ''}`}
+                      onClick={() => handlePaperSizeChange('77mm')}
                       role="radio"
-                      aria-checked={paperSize === '80mm'}
-                      title="80mm Standard thermal paper"
+                      aria-checked={paperSize === '77mm'}
+                      title="77mm RP 3160 STAR thermal paper"
                     >
-                      80mm
+                      77mm
                     </button>
                     <button
                       type="button"
@@ -1628,6 +1628,7 @@ export const BillingPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                <span className="form-help-text receipt-print-dialog-note">Print dialog: turn Headers and footers OFF</span>
 
                 <div className="receipt-lang-picker">
                   <span className="lang-picker-label">Language:</span>

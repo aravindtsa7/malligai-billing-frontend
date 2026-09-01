@@ -3790,7 +3790,7 @@ body {
 }
 
 /* ==========================================================================
-   Thermal Receipt Printing Styles (58mm & 80mm Modes)
+   Thermal Receipt Printing Styles (58mm & 77mm Modes)
    ========================================================================== */
 
 /* Screen mode: hide printable receipt container so it does not interfere with screen UI */
@@ -3879,8 +3879,8 @@ body {
   color: #000000;
 }
 
-/* 80mm Table Layout (4 Columns: Item Name | Rate | Qty | Amount) */
-.receipt-table-80mm {
+/* 77mm Table Layout (4 Columns: Item Name | Rate | Qty | Amount) */
+.receipt-table-77mm {
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
@@ -3888,7 +3888,7 @@ body {
   color: #000000;
 }
 
-.receipt-table-80mm th {
+.receipt-table-77mm th {
   border-bottom: 1px solid #000000;
   padding: 3px 2px;
   font-weight: 700;
@@ -3897,7 +3897,7 @@ body {
   color: #000000;
 }
 
-.receipt-table-80mm td {
+.receipt-table-77mm td {
   padding: 3px 2px;
   vertical-align: top;
   color: #000000;
@@ -4086,9 +4086,10 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Liberation Mono', Menlo, Monaco, Consolas, monospace !important;
   }
 
-  .printable-receipt-80mm {
-    width: 76mm !important;
-    max-width: 76mm !important;
+  /* 73mm content box + the existing 2mm @page margins on both sides = 77mm media. */
+  .printable-receipt-77mm {
+    width: 73mm !important;
+    max-width: 73mm !important;
   }
 
   .printable-receipt-58mm {
@@ -4104,7 +4105,8 @@ body {
   .modal-dialog,
   .modal-receipt-dialog,
   .bill-detail-page,
-  .billing-terminal-page {
+  .billing-terminal-page,
+  .label-printing-page {
     position: static !important;
     background: transparent !important;
     box-shadow: none !important;
@@ -4118,4 +4120,380 @@ body {
     overflow: visible !important;
     display: block !important;
   }
+
+  /* Scoped Label Printing Mode */
+  body.label-printing-mode > *:not(#label-print-root),
+  body.label-printing-mode > #root {
+    display: none !important;
+  }
+
+  body.label-printing-mode > #label-print-root,
+  body.label-printing-mode > #label-print-root * {
+    visibility: visible !important;
+  }
+
+  body.label-printing-mode > #label-print-root {
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: var(--label-media-width) !important;
+  }
+
+  body.label-printing-mode .printable-label-row {
+    page-break-after: always !important;
+    break-after: page !important;
+    width: var(--label-media-width) !important;
+    min-width: var(--label-media-width) !important;
+    height: var(--label-media-row-height) !important;
+    min-height: var(--label-media-row-height) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    display: grid !important;
+    grid-template-columns: repeat(var(--labels-per-row), var(--label-width)) !important;
+    grid-template-rows: var(--label-height) !important;
+    column-gap: var(--label-column-gap) !important;
+    row-gap: 0 !important;
+  }
+
+  body.label-printing-mode .printable-label-row:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  body.label-printing-mode .printable-label-slot,
+  body.label-printing-mode .empty-label-slot {
+    width: var(--label-width) !important;
+    min-width: var(--label-width) !important;
+    height: var(--label-height) !important;
+    min-height: var(--label-height) !important;
+  }
+
+  body.label-printing-mode .printable-label-slot .product-label-card {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+
+  /* Isolation: Hide receipt during label print, and hide labels during receipt print */
+  body.label-printing-mode .printable-receipt-wrapper {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body:not(.label-printing-mode) .printable-labels-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
+/* ==========================================================================
+   Product Label Printing & Settings Styles (25mm Four-Up Hardware Profile)
+   ========================================================================== */
+
+/* Label Printing Page Layout */
+.label-printing-page {
+  padding: 0;
+}
+
+.label-page-layout-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.label-print-columns {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .label-print-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-subheading {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main, #1e293b);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Selected Product Summary Card */
+.selected-product-card {
+  padding: 16px;
+  background: var(--bg-subtle, #f8fafc);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+}
+
+.selected-product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.selected-product-title {
+  margin: 6px 0 2px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+}
+
+.selected-product-tamil {
+  font-size: 13px;
+  color: var(--text-muted, #64748b);
+}
+
+.selected-product-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  background: #ffffff;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.meta-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-box .meta-label {
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.meta-box .meta-value {
+  font-size: 13.5px;
+  color: var(--text-main, #1e293b);
+}
+
+.search-results-table-wrapper {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 6px;
+}
+
+.label-picker-table {
+  width: 100%;
+  font-size: 12.5px;
+}
+
+.picker-product-name {
+  font-weight: 600;
+  color: var(--text-main, #1e293b);
+}
+
+.picker-product-tamil {
+  font-size: 11.5px;
+}
+
+/* Live Preview Stage */
+.preview-container-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 16px;
+  background: var(--bg-subtle, #f8fafc);
+  border: 1.5px dashed var(--border-color, #cbd5e1);
+  border-radius: 8px;
+}
+
+.preview-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.preview-info-tag {
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+  text-align: center;
+}
+
+.preview-empty-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted, #94a3b8);
+  font-size: 13px;
+  text-align: center;
+}
+
+.btn-print-labels-action {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Product Label Visual Hierarchy (Monochrome High Contrast)
+   -------------------------------------------------------------------------- */
+.product-label-card {
+  background: #ffffff;
+  color: #000000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  width: var(--label-width);
+  min-width: var(--label-width);
+  max-width: var(--label-width);
+  height: var(--label-height);
+  min-height: var(--label-height);
+  max-height: var(--label-height);
+  padding: 1mm;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Liberation Mono', Menlo, Monaco, Consolas, sans-serif;
+  overflow: hidden;
+}
+
+/* Preview mode specific styling */
+.preview-label-item {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #000000;
+  border-radius: 2px;
+}
+
+.label-store-name {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 1px;
+  overflow: hidden;
+  color: #000000;
+  font-size: 5.5px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.label-product-name {
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.05;
+  margin-bottom: 1px;
+  max-width: 100%;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.label-meta-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1px;
+  font-size: 6.5px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.label-pkd {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 5.5px;
+  font-weight: 600;
+}
+
+.label-mrp {
+  flex: 0 1 auto;
+  max-width: 62%;
+  margin-left: 2px;
+  overflow: hidden;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.label-mrp-text {
+  font-size: 6px;
+  font-weight: 800;
+}
+
+.label-mrp-value {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: -0.1px;
+}
+
+.label-barcode-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.label-barcode-svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.label-product-code {
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #000000;
+  line-height: 1;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.label-print-dialog-note {
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Multi-copy Print Container (Hidden in normal screen mode) */
+.printable-labels-container {
+  display: none;
 }

@@ -1,7 +1,8 @@
 import React from 'react';
+import { formatQuantity } from '../utils/decimal.ts';
 import type { SerializedBill } from '../types/billing.types.ts';
 
-export type PaperSize = '58mm' | '80mm';
+export type PaperSize = '58mm' | '77mm';
 export type ReceiptLanguage = 'ENGLISH' | 'TAMIL';
 
 export interface PrintableReceiptProps {
@@ -12,7 +13,7 @@ export interface PrintableReceiptProps {
 
 export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({
   bill,
-  paperSize = '80mm',
+  paperSize = '77mm',
   language = 'ENGLISH',
 }) => {
   if (!bill) return null;
@@ -150,9 +151,9 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({
 
       {/* Items Section */}
       <div className="receipt-items-section">
-        {paperSize === '80mm' ? (
-          /* 80mm Layout: 4-Column Compact Thermal Table (Item Name | Rate | Qty | Amount) */
-          <table className="receipt-table-80mm">
+        {paperSize === '77mm' ? (
+          /* 77mm Layout: 4-Column Compact Thermal Table (Item Name | Rate | Qty | Amount) */
+          <table className="receipt-table-77mm">
             <thead>
               <tr>
                 <th className="th-r-name">Item Name</th>
@@ -172,7 +173,7 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({
                       </td>
                       <td className="td-r-rate text-right font-mono">{item.rate}</td>
                       <td className="td-r-qty text-center font-mono">
-                        {item.quantity} {item.unit}
+                        {formatQuantity(item.quantity)} {item.unit}
                       </td>
                       <td className="td-r-amount text-right font-mono">{item.amount}</td>
                     </tr>
@@ -201,7 +202,7 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({
                     <div className="receipt-58mm-item-name">{displayName}</div>
                     <div className="receipt-58mm-item-details-row font-mono">
                       <span className="receipt-58mm-rate">{item.rate}</span>
-                      <span className="receipt-58mm-qty">{item.quantity} {item.unit}</span>
+                      <span className="receipt-58mm-qty">{formatQuantity(item.quantity)} {item.unit}</span>
                       <span className="receipt-58mm-amount font-bold">{item.amount}</span>
                     </div>
                   </div>

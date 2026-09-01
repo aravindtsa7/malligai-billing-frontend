@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { productApi } from '../api/product.api.ts';
 import { categoryApi } from '../api/category.api.ts';
 import { getApiErrorMessage } from '../api/api-client.ts';
+import { formatQuantity } from '../utils/decimal.ts';
 import type { Product } from '../types/product.types.ts';
 import type { Category } from '../types/category.types.ts';
 
@@ -448,7 +449,7 @@ export const ProductListPage: React.FC = () => {
                       <td className="td-rate text-right font-mono">₹{product.retailRate}</td>
                       <td className="td-rate text-right font-mono">₹{product.functionRate}</td>
                       <td className="td-stock text-right font-mono font-semibold">
-                        {product.currentStock} <span className="stock-unit">{product.unit}</span>
+                        {formatQuantity(product.currentStock)} <span className="stock-unit">{product.unit}</span>
                       </td>
                       <td className="td-status text-center">
                         <span className={`status-badge ${product.active ? 'status-active' : 'status-inactive'}`}>

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth.ts';
 import { billingApi } from '../api/billing.api.ts';
 import { getApiErrorMessage } from '../api/api-client.ts';
-import { formatDisplayCurrency } from '../utils/decimal.ts';
+import { formatDisplayCurrency, formatQuantity } from '../utils/decimal.ts';
 import type { SerializedBill } from '../types/billing.types.ts';
 import {
   PrintableReceipt,
@@ -29,7 +29,7 @@ export const BillDetailPage: React.FC = () => {
   // Thermal Receipt Paper Size & Language State
   const [paperSize, setPaperSize] = useState<PaperSize>(() => {
     const saved = localStorage.getItem('malligai_receipt_paper_size');
-    return saved === '58mm' ? '58mm' : '80mm';
+    return saved === '58mm' ? '58mm' : '77mm';
   });
   const [receiptLanguage, setReceiptLanguage] = useState<ReceiptLanguage>('ENGLISH');
 
@@ -205,13 +205,13 @@ export const BillDetailPage: React.FC = () => {
                 <div className="paper-size-buttons" role="radiogroup" aria-label="Receipt Paper Width">
                   <button
                     type="button"
-                    className={`btn-paper-size ${paperSize === '80mm' ? 'btn-paper-size-active' : ''}`}
-                    onClick={() => handlePaperSizeChange('80mm')}
+                    className={`btn-paper-size ${paperSize === '77mm' ? 'btn-paper-size-active' : ''}`}
+                    onClick={() => handlePaperSizeChange('77mm')}
                     role="radio"
-                    aria-checked={paperSize === '80mm'}
-                    title="80mm Standard thermal receipt"
+                    aria-checked={paperSize === '77mm'}
+                    title="77mm RP 3160 STAR thermal receipt"
                   >
-                    80mm
+                    77mm
                   </button>
                   <button
                     type="button"
@@ -225,6 +225,7 @@ export const BillDetailPage: React.FC = () => {
                   </button>
                 </div>
               </div>
+              <span className="form-help-text receipt-print-dialog-note">Print dialog: turn Headers and footers OFF</span>
 
               <div className="receipt-lang-picker">
                 <span className="paper-size-label">Lang:</span>
@@ -540,7 +541,7 @@ export const BillDetailPage: React.FC = () => {
                           <span className="unit-badge">{item.unit}</span>
                         </td>
                         <td className="td-item-qty text-center font-mono font-semibold">
-                          {item.quantity} <span className="stock-unit">{item.unit}</span>
+                          {formatQuantity(item.quantity)} <span className="stock-unit">{item.unit}</span>
                         </td>
                         <td className="td-item-rate-type text-center">
                           <span className="badge badge-subtle">{item.rateType}</span>

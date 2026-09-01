@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { productApi } from '../api/product.api.ts';
 import { categoryApi } from '../api/category.api.ts';
 import { getApiErrorMessage } from '../api/api-client.ts';
+import { formatQuantity } from '../utils/decimal.ts';
 import type { Category } from '../types/category.types.ts';
 import { UNITS, type Unit, type CreateProductInput, type UpdateProductInput } from '../types/product.types.ts';
 
@@ -724,7 +725,7 @@ export const ProductFormPage: React.FC = () => {
               <div className="stock-readonly-content">
                 <div className="stock-readonly-label">Current Stock on Hand</div>
                 <div className="stock-readonly-value font-mono">
-                  {formData.currentStock} <span className="unit-label">{formData.unit}</span>
+                  {formatQuantity(formData.currentStock)} <span className="unit-label">{formData.unit}</span>
                 </div>
               </div>
               <div className="stock-readonly-note">
