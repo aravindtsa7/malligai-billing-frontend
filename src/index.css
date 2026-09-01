@@ -7,30 +7,43 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-  /* Neutral Surface Palette */
-  --bg-app: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-subtle: #f1f5f9;
-  --bg-muted: #e2e8f0;
+  /* Malligai Visual Tokens */
+  --malligai-gold: #b8860b;
+  --malligai-gold-dark: #8c651e;
+  --malligai-gold-soft: #fbf5e8;
+  --malligai-cream: #faf7f0;
+  --malligai-page: #f5f2ea;
+  --malligai-card: #ffffff;
+  --malligai-text: #1f2421;
+  --malligai-muted: #6b7280;
+  --malligai-border: #e6dfd3;
+  --malligai-danger: #b91c1c;
+  --malligai-success: #15803d;
+
+  /* Neutral Surface Palette (Mapped to Malligai theme) */
+  --bg-app: var(--malligai-page);
+  --bg-surface: var(--malligai-card);
+  --bg-subtle: var(--malligai-cream);
+  --bg-muted: #ece6db;
 
   /* Text Colors */
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text-primary: var(--malligai-text);
+  --text-secondary: #374151;
+  --text-muted: var(--malligai-muted);
   --text-inverse: #ffffff;
 
   /* Borders */
-  --border-strong: #94a3b8;
-  --border-default: #cbd5e1;
-  --border-subtle: #e2e8f0;
-  --border-light: #f1f5f9;
+  --border-strong: #c4b9a8;
+  --border-default: var(--malligai-border);
+  --border-subtle: #ede7dd;
+  --border-light: #f7f4ed;
 
-  /* Brand / Primary (Navy) */
-  --primary: #1e3a8a;
-  --primary-hover: #1d4ed8;
-  --primary-active: #172554;
-  --primary-light: #eff6ff;
-  --primary-border: #bfdbfe;
+  /* Brand / Primary (Malligai Warm Gold & Deep Bronze) */
+  --primary: #9b722b;
+  --primary-hover: #835f21;
+  --primary-active: #6e4e18;
+  --primary-light: var(--malligai-gold-soft);
+  --primary-border: #e4cfa7;
 
   /* Status Colors */
   --success: #15803d;
@@ -49,21 +62,21 @@
 
   /* Rates Pricing Colors */
   --rate-cost: #c2410c;
-  --rate-normal: #0f172a;
+  --rate-normal: #1f2421;
 
   /* Roles */
-  --role-admin-bg: #fef3c7;
-  --role-admin-text: #92400e;
-  --role-admin-border: #fde68a;
+  --role-admin-bg: #fdf3df;
+  --role-admin-text: #966311;
+  --role-admin-border: #fae1b2;
 
-  --role-salesman-bg: #e0e7ff;
+  --role-salesman-bg: #eef2ff;
   --role-salesman-text: #3730a3;
   --role-salesman-border: #c7d2fe;
 
   /* Elevation & Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
 
   /* Radius */
   --radius-xs: 3px;
@@ -579,119 +592,1004 @@ body {
   color: var(--text-muted);
   pointer-events: none;
 }
-
 .input-with-prefix {
   padding-left: 26px !important;
 }
 
 /* --------------------------------------------------------------------------
-   App Layout & Header
+   Login Page Styling (Malligai Theme)
    -------------------------------------------------------------------------- */
+.login-wrapper {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: var(--malligai-page, #f5f2ea);
+  background-image:
+    linear-gradient(to right, rgba(245, 242, 234, 0.45) 0%, rgba(245, 242, 234, 0.12) 50%, rgba(245, 242, 234, 0) 100%),
+    url('/images/malligai-login-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow-y: auto;
+  padding: 32px 6% 32px clamp(48px, 32vw, 480px);
+}
+
+.login-card-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 410px;
+}
+
+.login-card {
+  background: rgba(255, 252, 245, 0.86);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  border: 1px solid rgba(212, 169, 77, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 16px 36px -6px rgba(31, 36, 33, 0.09), 0 0 0 1px rgba(212, 169, 77, 0.20), 0 4px 16px -2px rgba(184, 134, 11, 0.08);
+  padding: 36px 32px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.login-brand-logo {
+  width: 160px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(140, 101, 30, 0.12));
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--malligai-muted, #6b7280);
+  margin: 4px 0 0 0;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-field-icon {
+  position: absolute;
+  left: 13px;
+  color: #9c9488;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.form-input.input-with-icon {
+  padding-left: 38px;
+  width: 100%;
+}
+
+.form-input.input-with-action {
+  padding-right: 40px;
+}
+
+.input-action-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #9c9488;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.input-action-btn:hover {
+  color: #8c651e;
+}
+
+.btn-login-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(180deg, #b8860b 0%, #a47608 100%);
+  color: #ffffff;
+  border: 1px solid #8c651e;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(184, 134, 11, 0.25);
+  transition: all 0.15s ease-in-out;
+  margin-top: 6px;
+}
+
+.btn-login-cta:hover:not(:disabled) {
+  background: linear-gradient(180deg, #a47608 0%, #8c651e 100%);
+  box-shadow: 0 5px 12px rgba(140, 101, 30, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-login-cta:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(140, 101, 30, 0.2);
+}
+
+.btn-login-cta:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .login-wrapper {
+    justify-content: center;
+    padding: 24px 16px;
+    background-position: center right;
+    background-image:
+      linear-gradient(rgba(245, 242, 234, 0.70), rgba(245, 242, 234, 0.70)),
+      url('/images/malligai-login-bg.png');
+  }
+
+  .login-card-container {
+    margin: auto;
+  }
+
+  .login-card {
+    padding: 26px 22px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   App Layout & Shell (Left Sidebar + Topbar)
+   -------------------------------------------------------------------------- */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--malligai-page);
+  color: var(--malligai-text);
+  position: relative;
+}
+
+/* Backward compatibility wrapper */
 .app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.app-header {
-  background-color: var(--bg-surface);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 0 24px;
-  height: 54px;
+.app-sidebar {
+  width: 250px;
+  background-color: var(--malligai-card);
+  border-right: 1px solid var(--malligai-border);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow-xs);
+  flex-direction: column;
   position: sticky;
   top: 0;
-  z-index: 20;
+  height: 100vh;
+  z-index: 40;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
-.header-left {
+.sidebar-brand {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--malligai-border);
   display: flex;
   align-items: center;
+  background: linear-gradient(180deg, #ffffff 0%, var(--malligai-cream) 100%);
+  min-height: 58px;
 }
 
-.header-brand-link {
+.sidebar-brand-link {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
   color: inherit;
+  width: 100%;
 }
 
-.brand-badge {
+.sidebar-full-logo {
+  display: block;
+  width: 112px;
+  max-width: 120px;
+  height: auto;
+  object-fit: contain;
+}
+
+.sidebar-mark-logo {
+  display: none;
+  height: 32px;
+  width: 32px;
+  object-fit: contain;
+}
+
+/* Collapsed Sidebar */
+.app-sidebar.sidebar-collapsed {
+  width: 68px;
+}
+
+.app-sidebar.sidebar-collapsed .sidebar-brand {
+  padding: 12px 8px;
+  justify-content: center;
+}
+
+.app-sidebar.sidebar-collapsed .sidebar-full-logo {
+  display: none;
+}
+
+.app-sidebar.sidebar-collapsed .sidebar-mark-logo {
+  display: block;
+  margin: 0 auto;
+}
+
+.app-sidebar.sidebar-collapsed .nav-label,
+.app-sidebar.sidebar-collapsed .user-meta-text,
+.app-sidebar.sidebar-collapsed .logout-text {
+  display: none;
+}
+
+.app-sidebar.sidebar-collapsed .sidebar-nav-item {
+  justify-content: center;
+  padding: 10px;
+}
+
+.app-sidebar.sidebar-collapsed .sidebar-user-info {
+  justify-content: center;
+}
+
+.app-sidebar.sidebar-collapsed .sidebar-logout-btn {
+  padding: 8px;
+}
+
+/* Mobile Sidebar Drawer */
+@media (max-width: 900px) {
+  .app-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    width: 260px;
+    box-shadow: none;
+  }
+
+  .app-sidebar.sidebar-mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(31, 36, 33, 0.15);
+  }
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9.5px 12px;
+  border-radius: 8px;
+  color: var(--malligai-muted);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.12s ease;
+  border: 1px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--malligai-gold-soft);
+  color: var(--malligai-gold-dark);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--malligai-gold-soft);
+  color: var(--malligai-gold-dark);
+  font-weight: 600;
+  border-color: #f1dfbb;
+}
+
+.sidebar-nav-item.active .nav-icon {
+  color: #b8860b;
+}
+
+.nav-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  background-color: var(--primary);
-  color: var(--text-inverse);
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  border-radius: var(--radius-sm);
+  width: 20px;
+  height: 20px;
+  color: inherit;
+  flex-shrink: 0;
 }
 
-.header-brand-text {
+.sidebar-footer {
+  padding: 14px 14px;
+  border-top: 1px solid var(--malligai-border);
+  background-color: var(--malligai-cream);
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.brand-title {
-  font-size: 16px;
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #faebd7;
+  color: #8c651e;
+  border: 1px solid #e6dfd3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 700;
-  color: var(--primary);
-  margin: 0;
-  letter-spacing: -0.2px;
+  font-size: 13px;
+  flex-shrink: 0;
 }
 
-.brand-subtitle {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  font-weight: 500;
+.user-meta-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 2px;
 }
 
-.header-user-section {
+.user-meta-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--malligai-text);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.sidebar-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--malligai-border);
+  background-color: #ffffff;
+  color: var(--malligai-muted);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.sidebar-logout-btn:hover {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+/* Main Layout Area */
+.app-main-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+/* Top Bar */
+.app-topbar {
+  height: 58px;
+  background-color: var(--malligai-card);
+  border-bottom: 1px solid var(--malligai-border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.topbar-left {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.user-info {
+.btn-sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  border: 1px solid var(--malligai-border);
+  background-color: var(--malligai-cream);
+  color: var(--malligai-text);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.btn-sidebar-toggle:hover {
+  background-color: #f1ebd8;
+}
+
+.topbar-page-context {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  background-color: var(--bg-subtle);
-  padding: 4px 10px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
 }
 
-.user-icon-avatar {
-  display: inline-flex;
-  align-items: center;
-  color: var(--text-muted);
+.topbar-brand-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b8860b;
+  letter-spacing: 0.6px;
 }
 
-.user-name {
+.topbar-page-title {
+  font-size: 14.5px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--malligai-text);
 }
 
-.app-main {
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background-color: var(--malligai-cream);
+  border: 1px solid var(--malligai-border);
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.topbar-user-name {
+  font-weight: 600;
+  color: var(--malligai-text);
+}
+
+.btn-topbar-logout {
+  padding: 6px 12px;
+  font-size: 12.5px;
+}
+
+/* App Main Content Area */
+.app-main-content {
   flex: 1;
   padding: 24px;
-  max-width: 1240px;
   width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
+  position: relative;
 }
 
 /* --------------------------------------------------------------------------
-   Dashboard Pages
+   Malligai Dashboard Styles
+   -------------------------------------------------------------------------- */
+.dashboard-page-container {
+  position: relative;
+  min-height: calc(100vh - 58px - 48px);
+}
+
+/* Background Artwork */
+.dashboard-bg-artwork {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: url('/images/malligai-dashboard-bg.png');
+  background-repeat: no-repeat;
+  background-position: center right;
+  background-size: cover;
+  opacity: 0.82; /* Clearly visible devotional Murugar background artwork */
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 12px;
+}
+
+.dashboard-content-layer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Hero Welcome Header */
+.dashboard-hero-header {
+  background: rgba(255, 252, 245, 0.68);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 1px solid rgba(212, 169, 77, 0.28);
+  border-radius: 14px;
+  padding: 22px 28px;
+  box-shadow: 0 4px 16px -2px rgba(31, 36, 33, 0.04), 0 0 0 1px rgba(212, 169, 77, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hero-welcome-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b8860b;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.hero-welcome-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--malligai-text);
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.hero-welcome-desc {
+  font-size: 13.5px;
+  color: var(--malligai-muted);
+}
+
+.dashboard-actions-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Summary Stats Cards */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-stat-card {
+  background-color: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 1px solid rgba(230, 223, 211, 0.80);
+  border-radius: 14px;
+  padding: 18px 20px;
+  min-height: 104px;
+  box-shadow: 0 4px 14px -2px rgba(31, 36, 33, 0.04), 0 0 0 1px rgba(212, 169, 77, 0.08);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.dashboard-stat-card:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -3px rgba(31, 36, 33, 0.08), 0 0 0 1px rgba(184, 134, 11, 0.22);
+}
+
+.stat-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-card-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #78716c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--malligai-text);
+  font-family: var(--font-mono);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.stat-card-subtext {
+  font-size: 11.5px;
+  color: var(--malligai-muted);
+}
+
+.stat-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: var(--malligai-gold-soft);
+  color: #b8860b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #f2e3c7;
+}
+
+.stat-card-icon.danger-tone {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.stat-card-icon.success-tone {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+/* Quick Actions Section */
+.dashboard-quick-actions {
+  background-color: rgba(255, 252, 245, 0.58);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 1px solid rgba(212, 169, 77, 0.25);
+  border-radius: 14px;
+  padding: 18px 22px;
+  box-shadow: 0 4px 16px -2px rgba(31, 36, 33, 0.04), 0 0 0 1px rgba(212, 169, 77, 0.10);
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--malligai-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1000px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: 9px;
+  background-color: rgba(255, 255, 255, 0.60);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 1px solid rgba(230, 223, 211, 0.80);
+  color: var(--malligai-text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: #d4a94d;
+  color: var(--malligai-gold-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(184, 134, 11, 0.16);
+}
+
+.quick-action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  border: 1px solid var(--malligai-border);
+  color: #b8860b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-action-arrow {
+  margin-left: auto;
+  color: #b8860b;
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform 0.15s ease;
+}
+
+.quick-action-btn:hover .quick-action-arrow {
+  transform: translateX(3px);
+}
+
+/* Dashboard Main Grid: Recent Bills + Stock Health */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-card {
+  background-color: rgba(255, 255, 255, 0.56);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 1px solid rgba(230, 223, 211, 0.80);
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: 0 6px 20px -4px rgba(31, 36, 33, 0.05), 0 0 0 1px rgba(212, 169, 77, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--malligai-border);
+}
+
+.dashboard-card-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--malligai-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-all-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #966f1e;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+  color: #785514;
+}
+
+/* Recent Bills Table */
+.recent-bills-table-container {
+  overflow-x: auto;
+}
+
+.recent-bills-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background-color: transparent;
+}
+
+.recent-bills-table th {
+  text-align: left;
+  padding: 9px 10px;
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--malligai-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--malligai-border);
+  background-color: rgba(255, 250, 240, 0.52);
+}
+
+.recent-bills-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid #f3ece1;
+  color: var(--malligai-text);
+  vertical-align: middle;
+  background-color: rgba(255, 255, 255, 0.24);
+}
+
+.recent-bills-table tr:last-child td {
+  border-bottom: none;
+}
+
+.recent-bills-table tr:hover td {
+  background-color: rgba(250, 246, 238, 0.45);
+}
+
+.recent-bills-table .bill-num-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: #8c651e;
+}
+
+.recent-bills-table .amount-cell {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.btn-view-bill {
+  padding: 3px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid var(--malligai-border);
+  background-color: #ffffff;
+  color: var(--malligai-text);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-view-bill:hover {
+  background-color: var(--malligai-gold-soft);
+  color: var(--malligai-gold-dark);
+}
+
+/* Stock Alert Items */
+.stock-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stock-alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: rgba(255, 252, 245, 0.70);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  border: 1px solid rgba(230, 223, 211, 0.75);
+  border-radius: 8px;
+  font-size: 13px;
+  gap: 10px;
+}
+
+.stock-alert-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stock-alert-name {
+  font-weight: 600;
+  color: var(--malligai-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stock-alert-code {
+  font-size: 11px;
+  color: var(--malligai-muted);
+  font-family: var(--font-mono);
+}
+
+.stock-alert-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stock-alert-qty {
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #b91c1c;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11.5px;
+}
+
+.empty-state-box {
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--malligai-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-state-icon {
+  color: #b8860b;
+  opacity: 0.7;
+}
+
+.empty-state-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--malligai-text);
+}
+
+.empty-state-desc {
+  font-size: 12.5px;
+  color: var(--malligai-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Legacy Dashboard Modules (Fallback)
    -------------------------------------------------------------------------- */
 .dashboard-page {
   display: flex;
@@ -4099,6 +4997,11 @@ body {
 
   /* Reset app layout ancestors to prevent blank page generation */
   #root,
+  .app-shell,
+  .app-sidebar,
+  .app-topbar,
+  .app-main-layout,
+  .app-main-content,
   .app-container,
   .app-main,
   .modal-backdrop,
@@ -4106,7 +5009,10 @@ body {
   .modal-receipt-dialog,
   .bill-detail-page,
   .billing-terminal-page,
-  .label-printing-page {
+  .label-printing-page,
+  .dashboard-page-container,
+  .login-wrapper,
+  .login-card-container {
     position: static !important;
     background: transparent !important;
     box-shadow: none !important;
@@ -4119,6 +5025,18 @@ body {
     width: auto !important;
     overflow: visible !important;
     display: block !important;
+  }
+
+  /* Explicitly hide shell & background artwork during print */
+  .app-sidebar,
+  .app-topbar,
+  .sidebar-backdrop,
+  .dashboard-bg-artwork,
+  .login-bg-artwork,
+  .login-wrapper {
+    display: none !important;
+    visibility: hidden !important;
+    background-image: none !important;
   }
 
   /* Scoped Label Printing Mode */

@@ -204,3 +204,39 @@ export function formatQuantity(qty: string | number | undefined | null): string 
   const formatted = fracPart ? `${wholePart}.${fracPart}` : wholePart;
   return isNegative && formatted !== '0' ? `-${formatted}` : formatted;
 }
+
+/**
+ * Returns a YYYY-MM-DD date string derived strictly from LOCAL calendar parts.
+ *
+ * Invariant: If local date is 2026-09-02, returns "2026-09-02" regardless of UTC date.
+ * Never uses Date.prototype.toISOString() which converts to UTC.
+ */
+export function getLocalCalendarDate(d: Date = new Date()): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Computes the exact ISO datetime range for the current LOCAL calendar day.
+ *
+ * Establishes shop local calendar boundaries:
+ *   start: local 00:00:00.000
+ *   end:   local 23:59:59.999
+ *
+ * Serializes these exact local boundary instants with toISOString() to satisfy
+ * backend schema requirements: z.string().datetime()
+ */
+export function getLocalDayBoundaryIsoRange(now: Date = new Date()): { startDate: string; endDate: string } {
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(now);
+  end.setHours(23, 59, 59, 999);
+
+  return {
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+  };
+}
