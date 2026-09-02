@@ -5,6 +5,7 @@ import { useAuth } from '../auth/useAuth.ts';
 interface NavItem {
   to: string;
   label: string;
+  badge?: string;
   icon: React.ReactNode;
   matchPrefixes?: string[];
   exact?: boolean;
@@ -15,6 +16,8 @@ export const AppLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const isFocusRoute = location.pathname === '/billing-v2';
+
   // Desktop sidebar collapse state (persisted in localStorage)
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     return localStorage.getItem('malligai_sidebar_collapsed') === 'true';
@@ -24,6 +27,7 @@ export const AppLayout: React.FC = () => {
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
 
   const handleToggleCollapse = () => {
+    if (isFocusRoute) return;
     setIsCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem('malligai_sidebar_collapsed', String(next));
@@ -66,6 +70,19 @@ export const AppLayout: React.FC = () => {
           <rect x="2" y="3" width="20" height="14" rx="2" />
           <line x1="8" y1="21" x2="16" y2="21" />
           <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+      ),
+    },
+    {
+      to: '/billing-v2',
+      label: 'Create Bill V2',
+      badge: 'V2',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+          <path d="M17 7l2 2-4 4" />
         </svg>
       ),
     },
@@ -170,6 +187,19 @@ export const AppLayout: React.FC = () => {
       ),
     },
     {
+      to: '/billing-v2',
+      label: 'Create Bill V2',
+      badge: 'V2',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+          <path d="M17 7l2 2-4 4" />
+        </svg>
+      ),
+    },
+    {
       to: '/bills',
       label: 'Bills',
       matchPrefixes: ['/bills'],
@@ -192,6 +222,7 @@ export const AppLayout: React.FC = () => {
     const path = location.pathname;
     if (path === '/admin' || path === '/salesman') return 'Dashboard';
     if (path === '/billing') return 'Billing Terminal';
+    if (path === '/billing-v2') return 'Create Bill V2';
     if (path.startsWith('/bills')) return 'Bill History';
     if (path.startsWith('/admin/categories')) return 'Category Master';
     if (path.startsWith('/admin/products')) return 'Product Management';
@@ -212,11 +243,14 @@ export const AppLayout: React.FC = () => {
     return location.pathname.startsWith(item.to);
   };
 
+  // Derive focus mode from route (/billing-v2 uses full workspace and collapses sidebar)
+  const effectiveCollapsed = isFocusRoute ? true : isCollapsed;
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isFocusRoute ? 'focus-layout' : ''}`}>
       {/* Left Sidebar */}
       <aside
-        className={`app-sidebar ${isCollapsed ? 'sidebar-collapsed' : ''} ${isMobileOpen ? 'sidebar-mobile-open' : ''}`}
+        className={`app-sidebar ${effectiveCollapsed ? 'sidebar-collapsed' : ''} ${isMobileOpen ? 'sidebar-mobile-open' : ''}`}
         aria-label="Sidebar Navigation"
       >
         {/* Brand Header */}
@@ -254,6 +288,7 @@ export const AppLayout: React.FC = () => {
               >
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-label">{item.label}</span>
+                {item.badge && <span className="nav-badge-v2">{item.badge}</span>}
               </NavLink>
             );
           })}
@@ -309,14 +344,17 @@ export const AppLayout: React.FC = () => {
             <button
               type="button"
               className="btn-sidebar-toggle"
+              disabled={isFocusRoute}
+              aria-disabled={isFocusRoute}
               onClick={() => {
+                if (isFocusRoute) return;
                 if (window.innerWidth <= 900) {
                   handleToggleMobile();
                 } else {
                   handleToggleCollapse();
                 }
               }}
-              title="Toggle Sidebar Navigation"
+              title={isFocusRoute ? 'Sidebar fixed in focus mode' : 'Toggle Sidebar Navigation'}
               aria-label="Toggle Sidebar"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

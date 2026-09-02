@@ -5415,3 +5415,636 @@ body {
 .printable-labels-container {
   display: none;
 }
+
+/* ==========================================================================
+   Create Bill V2 — Modern High-Density POS Terminal & Focus Layout
+   ========================================================================== */
+
+/* Navigation Badge for V2 in Sidebar */
+.nav-badge-v2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #b8860b 0%, #8c651e 100%);
+  color: #ffffff;
+  margin-left: auto;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.app-sidebar.sidebar-collapsed .nav-badge-v2 {
+  display: none;
+}
+
+/* POS Focus Layout Mode (derived dynamically when on /billing-v2) */
+.app-shell.focus-layout .app-topbar {
+  height: 40px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--malligai-border);
+}
+
+.app-shell.focus-layout .app-main-content {
+  padding: 6px 10px;
+  max-width: none;
+  width: 100%;
+  height: calc(100vh - 40px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Billing V2 Full Workspace Container */
+.billing-v2-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header Area: Smart Product Entry + Prominent Total */
+.billing-v2-header {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.billing-v2-entry-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.billing-v2-input-card {
+  background-color: var(--malligai-card);
+  border: 1.5px solid var(--malligai-border);
+  border-radius: var(--radius-md);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.billing-v2-input-card:focus-within {
+  border-color: var(--malligai-gold);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
+}
+
+.billing-v2-entry-form {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 8px;
+}
+
+.billing-v2-scanner-icon {
+  color: var(--malligai-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 2px;
+  flex-shrink: 0;
+}
+
+.billing-v2-entry-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--malligai-text);
+  background: transparent;
+  padding: 6px 4px;
+}
+
+.billing-v2-entry-input::placeholder {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.billing-v2-clear-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--malligai-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.billing-v2-clear-btn:hover {
+  color: var(--malligai-danger);
+  background-color: #fee2e2;
+}
+
+.billing-v2-enter-btn {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Autocomplete Dropdown Panel */
+.billing-v2-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1.5px solid var(--malligai-gold);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  max-height: 380px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-v2-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: var(--malligai-cream);
+  border-bottom: 1px solid var(--malligai-border);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--malligai-muted);
+}
+
+.dropdown-hints {
+  font-size: 10.5px;
+  color: #8c651e;
+}
+
+.billing-v2-dropdown-list {
+  list-style: none;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  max-height: 330px;
+}
+
+.billing-v2-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.billing-v2-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.billing-v2-dropdown-item.highlighted {
+  background-color: var(--malligai-gold-soft);
+  color: var(--malligai-text);
+  outline: none;
+}
+
+.billing-v2-dropdown-item.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: #fafafa;
+}
+
+.dropdown-item-code {
+  font-size: 12px;
+  font-weight: 700;
+  color: #b8860b;
+  min-width: 55px;
+  flex-shrink: 0;
+}
+
+.dropdown-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dropdown-item-name {
+  font-size: 13px;
+  color: var(--malligai-text);
+}
+
+.dropdown-item-tamil {
+  font-size: 12px;
+  color: var(--malligai-muted);
+}
+
+.dropdown-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.dropdown-item-unit {
+  padding: 1px 6px;
+  background-color: var(--malligai-cream);
+  border: 1px solid var(--malligai-border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--malligai-text);
+}
+
+.dropdown-item-rate {
+  font-size: 13px;
+  color: var(--malligai-text);
+}
+
+.dropdown-item-stock {
+  font-size: 11.5px;
+}
+
+.dropdown-item-stock.in-stock {
+  color: var(--malligai-success);
+}
+
+.dropdown-item-stock.out-of-stock {
+  color: var(--malligai-danger);
+  font-weight: 600;
+}
+
+.dropdown-inactive-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* Quick Keyboard Shortcuts Bar */
+.billing-v2-shortcuts-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.v2-hint-chip {
+  font-size: 11px;
+  padding: 1px 6px;
+  background-color: var(--malligai-cream);
+  border: 1px solid var(--malligai-border);
+  border-radius: 4px;
+  color: var(--malligai-muted);
+}
+
+.v2-hint-chip strong {
+  color: var(--malligai-gold-dark);
+}
+
+/* Large Total Card */
+.billing-v2-total-card {
+  background: linear-gradient(135deg, #24201a 0%, #151310 100%);
+  border: 2px solid #c89b3c;
+  border-radius: var(--radius-md);
+  padding: 6px 18px;
+  min-width: 220px;
+  text-align: right;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.v2-total-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #e4cfa7;
+  text-transform: uppercase;
+}
+
+.v2-total-amount {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fdf5e6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 1px 0;
+}
+
+.v2-total-meta {
+  font-size: 10.5px;
+  color: #c4b9a8;
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Feedback & Error Banners */
+.billing-v2-feedback-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.feedback-success {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.feedback-error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.v2-banner-close {
+  background: none;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  padding: 2px 4px;
+}
+
+.v2-banner-close:hover {
+  opacity: 1;
+}
+
+/* Middle Cart Workspace */
+.billing-v2-cart-workspace {
+  flex: 1;
+  min-height: 0;
+  background-color: var(--malligai-card);
+  border: 1px solid var(--malligai-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+}
+
+.billing-v2-table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.billing-v2-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.billing-v2-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.billing-v2-table th {
+  background-color: var(--malligai-cream);
+  border-bottom: 2px solid var(--malligai-border);
+  font-weight: 700;
+  color: var(--malligai-text);
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.billing-v2-table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.billing-v2-row {
+  transition: background-color 0.1s ease;
+}
+
+.billing-v2-row:hover {
+  background-color: #faf8f3;
+}
+
+.billing-v2-row.v2-row-last-scanned {
+  background-color: #fdf8eb;
+  border-left: 3px solid var(--malligai-gold);
+}
+
+.billing-v2-row.v2-row-error {
+  background-color: #fef2f2;
+}
+
+.v2-product-name {
+  color: var(--malligai-text);
+  font-size: 13px;
+}
+
+.v2-product-tamil {
+  font-size: 12px;
+}
+
+.v2-stock-warning {
+  font-size: 10.5px;
+  color: var(--malligai-danger);
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+.v2-qty-input {
+  width: 72px;
+  padding: 3px 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  border: 1.5px solid var(--malligai-border);
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--malligai-text);
+}
+
+.v2-qty-input:focus {
+  border-color: var(--malligai-gold);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2);
+}
+
+.v2-qty-input.input-error {
+  border-color: var(--malligai-danger);
+  background-color: #fff5f5;
+  color: var(--malligai-danger);
+}
+
+.v2-delete-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--malligai-muted);
+  cursor: pointer;
+  padding: 3px 7px;
+  font-size: 12px;
+  transition: all 0.12s ease;
+}
+
+.v2-delete-btn:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+/* Empty Cart State */
+.v2-empty-cart-row td {
+  padding: 40px 16px;
+}
+
+.v2-empty-cart-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--malligai-muted);
+}
+
+.v2-empty-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+.v2-empty-cart-state h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--malligai-text);
+  margin-bottom: 4px;
+}
+
+.v2-empty-cart-state p {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.v2-empty-shortcuts {
+  font-size: 11.5px;
+  color: #8c651e;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Bottom Sticky Footer */
+.billing-v2-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+  background-color: var(--malligai-card);
+  border: 1px solid var(--malligai-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.billing-v2-footer-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.v2-option-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.v2-option-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--malligai-muted);
+}
+
+.billing-v2-footer-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.v2-summary-chip {
+  font-size: 12px;
+  color: var(--malligai-text);
+  padding: 3px 8px;
+  background-color: var(--malligai-cream);
+  border: 1px solid var(--malligai-border);
+  border-radius: 4px;
+}
+
+.v2-clear-cart-btn {
+  font-size: 11.5px;
+  padding: 2px 8px;
+}
+
+.billing-v2-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-save-v2 {
+  min-height: 38px;
+  padding: 4px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  background: linear-gradient(135deg, #b8860b 0%, #8c651e 100%);
+  border: 1px solid #755214;
+  box-shadow: 0 2px 4px rgba(184, 134, 11, 0.25);
+}
+
+.btn-save-v2:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c89311 0%, #996f21 100%);
+}
+
+.save-btn-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-save-v2 .key-shortcut-hint {
+  font-size: 10px;
+  opacity: 0.85;
+}
