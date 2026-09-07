@@ -3,6 +3,7 @@ import {
   formatQuantity,
   getLocalCalendarDate,
   getLocalDayBoundaryIsoRange,
+  normalizeMoneyRate,
 } from './decimal.ts';
 
 describe('formatQuantity', () => {
@@ -100,5 +101,47 @@ describe('getLocalDayBoundaryIsoRange', () => {
     expect(startDate).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     expect(endDate).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     expect(new Date(startDate).getTime()).toBeLessThan(new Date(endDate).getTime());
+  });
+});
+
+describe('normalizeMoneyRate', () => {
+  it('normalizes whole numbers to two decimals', () => {
+    expect(normalizeMoneyRate('190')).toBe('190.00');
+    expect(normalizeMoneyRate('1')).toBe('1.00');
+    expect(normalizeMoneyRate('1000')).toBe('1000.00');
+  });
+
+  it('normalizes single decimal to two decimals', () => {
+    expect(normalizeMoneyRate('190.1')).toBe('190.10');
+    expect(normalizeMoneyRate('5.5')).toBe('5.50');
+  });
+
+  it('preserves exact two decimals without floating-point errors', () => {
+    expect(normalizeMoneyRate('190.10')).toBe('190.10');
+    expect(normalizeMoneyRate('190.99')).toBe('190.99');
+    expect(normalizeMoneyRate('0.01')).toBe('0.01');
+  });
+
+  it('normalizes leading zeros without floating-point conversion', () => {
+    expect(normalizeMoneyRate('000.50')).toBe('0.50');
+    expect(normalizeMoneyRate('00190.50')).toBe('190.50');
+    expect(normalizeMoneyRate('01.00')).toBe('1.00');
+  });
+
+  it('rejects zero representations', () => {
+    expect(normalizeMoneyRate('0')).toBeNull();
+    expect(normalizeMoneyRate('0.00')).toBeNull();
+    expect(normalizeMoneyRate('0.0')).toBeNull();
+    expect(normalizeMoneyRate('000')).toBeNull();
+    expect(normalizeMoneyRate('000.00')).toBeNull();
+  });
+
+  it('rejects negative numbers, non-numerics, and extra decimals', () => {
+    expect(normalizeMoneyRate('-190')).toBeNull();
+    expect(normalizeMoneyRate('-0.50')).toBeNull();
+    expect(normalizeMoneyRate('190.123')).toBeNull();
+    expect(normalizeMoneyRate('abc')).toBeNull();
+    expect(normalizeMoneyRate('')).toBeNull();
+    expect(normalizeMoneyRate('   ')).toBeNull();
   });
 });

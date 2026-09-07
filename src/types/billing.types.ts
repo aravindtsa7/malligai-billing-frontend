@@ -12,6 +12,8 @@ export const PAYMENT_TYPES: PaymentType[] = ['CASH', 'UPI'];
 export interface CreateBillItemInput {
   productId: number;
   quantity: string;
+  expectedUnitRate?: string;
+  unitRateOverride?: string;
 }
 
 export interface CreateBillInput {
@@ -106,6 +108,7 @@ export interface CartItem {
   functionRate: string;
   quantity: string;
   active: boolean;
+  unitRateOverride?: string;
 }
 
 /**

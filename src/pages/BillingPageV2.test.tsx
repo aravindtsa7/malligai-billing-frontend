@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   isAuthenticated: true,
   loading: false,
   getProductByScanValue: vi.fn(),
+  getProductById: vi.fn(),
   searchProducts: vi.fn(),
   listProducts: vi.fn(),
   listCategories: vi.fn(),
@@ -29,6 +30,7 @@ vi.mock('../auth/useAuth.ts', () => ({
 vi.mock('../api/product.api.ts', () => ({
   productApi: {
     getProductByScanValue: mocks.getProductByScanValue,
+    getProductById: mocks.getProductById,
     searchProducts: mocks.searchProducts,
     listProducts: mocks.listProducts,
   },
@@ -202,6 +204,7 @@ describe('Create Bill V2 — Phase 1 Verification Suite', () => {
     mocks.listCategories.mockResolvedValue([]);
     mocks.createBill.mockResolvedValue(mockSavedBill);
     mocks.listBills.mockResolvedValue({ bills: [], pagination: { totalPages: 1 } });
+    mocks.getProductById.mockResolvedValue(sampleProductA);
   });
 
   afterEach(() => {
@@ -570,7 +573,7 @@ describe('Create Bill V2 — Phase 1 Verification Suite', () => {
       expect(mocks.createBill).toHaveBeenCalledWith({
         rateType: 'NORMAL',
         paymentType: 'CASH',
-        items: [{ productId: 101, quantity: '1' }],
+        items: [{ productId: 101, quantity: '1', expectedUnitRate: '65.00' }],
       });
       expect(screen.getByText('Bill Created Successfully')).toBeInTheDocument();
     });
@@ -1035,8 +1038,8 @@ describe('Create Bill V2 — Phase 1 Verification Suite', () => {
           rateType: 'NORMAL',
           paymentType: 'CASH',
           items: [
-            { productId: 101, quantity: '2' },
-            { productId: 102, quantity: '1' },
+            { productId: 101, quantity: '2', expectedUnitRate: '65.00' },
+            { productId: 102, quantity: '1', expectedUnitRate: '42.00' },
           ],
         });
       });
@@ -1421,6 +1424,357 @@ describe('Create Bill V2 — Phase 1 Verification Suite', () => {
       await waitFor(() => {
         expect(screen.getByText('Malligai Counter Checkout')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('F5 Bill-Level Rate Override Suite', () => {
+    it('1. F5 on empty cart: shows controlled error and does not open modal', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Scan barcode or type code / product name...')).toBeInTheDocument();
+      });
+
+      // Press F5 when cart is empty
+      fireEvent.keyDown(window, { key: 'F5' });
+
+      // Modal must NOT open
+      expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+
+      // Controlled feedback shown
+      expect(screen.getByText(/Cart is empty. Add a product first to edit rate/i)).toBeInTheDocument();
+    });
+
+    it('2. F5 on main screen opens modal with product name, master rate, current rate, input autofocus', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+
+      await waitFor(() => {
+        expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument();
+      });
+
+      // Press F5 on main screen
+      fireEvent.keyDown(window, { key: 'F5' });
+
+      // Modal opens with product info and override notice
+      await waitFor(() => {
+        expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument();
+      });
+      expect(screen.getAllByText('Ponni Rice 1kg').length).toBeGreaterThan(0);
+      expect(screen.getByText('Code: 0042')).toBeInTheDocument();
+      expect(screen.getByText('Master Rate (NORMAL)')).toBeInTheDocument();
+      expect(screen.getByText(/This change applies to this bill only/i)).toBeInTheDocument();
+      expect(screen.getAllByText('₹65.00').length).toBeGreaterThan(0);
+
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      expect(rateInput).toHaveValue('65.00');
+    });
+
+    it('3. F5 modal Esc closes without changes', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Open F5
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+
+      // Cancel with Escape
+      fireEvent.keyDown(window, { key: 'Escape' });
+
+      await waitFor(() => {
+        expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByText('EDITED')).not.toBeInTheDocument();
+    });
+
+    it('4. F5 modal validates positive money value; invalid rejection shows error, prevents apply', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+
+      // Test negative
+      fireEvent.change(rateInput, { target: { value: '-5.00' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+      expect(screen.getByText(/Please enter a valid rate greater than 0/i)).toBeInTheDocument();
+
+      // Test >2 decimals
+      fireEvent.change(rateInput, { target: { value: '10.555' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+      expect(screen.getByText(/Please enter a valid rate greater than 0/i)).toBeInTheDocument();
+
+      // Test zero
+      fireEvent.change(rateInput, { target: { value: '0' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+      expect(screen.getByText(/Please enter a valid rate greater than 0/i)).toBeInTheDocument();
+
+      // Modal still open, no override applied
+      expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument();
+      expect(screen.queryByText('EDITED')).not.toBeInTheDocument();
+    });
+
+    it('5. F5 modal Apply: updates cart row unitRateOverride, line amount, grand total, shows EDITED tag, and makes no API call', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Initial rate ₹65.00
+      expect(screen.getAllByText('₹65.00').length).toBeGreaterThan(0);
+
+      // Open F5
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.change(rateInput, { target: { value: '75.00' } });
+
+      // Apply
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+
+      // Modal closed
+      await waitFor(() => {
+        expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+      });
+
+      // Cart line rate updated to ₹75.00 and grand total updated to ₹75.00
+      await waitFor(() => {
+        expect(screen.getAllByText('₹75.00').length).toBeGreaterThan(0);
+      });
+      expect(screen.getByText('EDITED')).toBeInTheDocument();
+      expect(screen.getByText(/Applied bill rate ₹75.00 for "Ponni Rice 1kg"/i)).toBeInTheDocument();
+    });
+
+    it('6. Save bill sends unitRateOverride and omits expectedUnitRate for overridden row', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Override rate to 75.00
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.change(rateInput, { target: { value: '75.00' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+      await waitFor(() => expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument());
+
+      // Save Bill (F4)
+      fireEvent.keyDown(window, { key: 'F4' });
+
+      await waitFor(() => {
+        expect(mocks.createBill).toHaveBeenCalled();
+      });
+
+      const calledItem = mocks.createBill.mock.calls[0][0].items[0];
+      expect(calledItem.productId).toBe(101);
+      expect(calledItem.quantity).toBe('1');
+      expect(calledItem.unitRateOverride).toBe('75.00');
+      expect(calledItem).not.toHaveProperty('expectedUnitRate');
+    });
+
+    it('7. Save bill sends expectedUnitRate and omits unitRateOverride for non-overridden row', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Save Bill directly without override
+      fireEvent.keyDown(window, { key: 'F4' });
+
+      await waitFor(() => {
+        expect(mocks.createBill).toHaveBeenCalled();
+      });
+
+      const calledItem = mocks.createBill.mock.calls[0][0].items[0];
+      expect(calledItem.productId).toBe(101);
+      expect(calledItem.quantity).toBe('1');
+      expect(calledItem.expectedUnitRate).toBe('65.00');
+      expect(calledItem).not.toHaveProperty('unitRateOverride');
+    });
+
+    it('8. F3 target preserved after F5 override', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      // Add first item
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Add second item (Sugar)
+      mocks.getProductByScanValue.mockResolvedValueOnce(sampleProductB);
+      fireEvent.change(input, { target: { value: '0043' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Sugar 1kg')).toBeInTheDocument());
+
+      // F5 targets last-added (Sugar)
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      expect(screen.getByText('Code: 0043')).toBeInTheDocument();
+
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.change(rateInput, { target: { value: '45.00' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+
+      await waitFor(() => {
+        expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+      });
+
+      // Now press F3 -> targets last-added (Sugar)
+      fireEvent.keyDown(window, { key: 'F3' });
+      const sugarQtyInput = screen.getByLabelText('Quantity for Sugar 1kg');
+      expect(document.activeElement).toBe(sugarQtyInput);
+    });
+
+    it('9. F5 inside F6 review modal targets highlighted row, applies override, returns to review modal with EDITED tag', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      mocks.getProductByScanValue.mockResolvedValueOnce(sampleProductB);
+      fireEvent.change(input, { target: { value: '0043' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Sugar 1kg')).toBeInTheDocument());
+
+      // Open F6 Review Modal
+      fireEvent.keyDown(window, { key: 'F6' });
+      await waitFor(() => expect(screen.getByText('Review Bill Cart')).toBeInTheDocument());
+
+      // Row 0 is Ponni Rice (Code 0042). Press F5
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      // Must target row 0 (0042) and NOT the last added (0043)
+      expect(screen.getByText('Code: 0042')).toBeInTheDocument();
+
+      // Apply 70.00
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.change(rateInput, { target: { value: '70.00' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+
+      // After apply, rate modal closes and returns to F6 review modal
+      await waitFor(() => {
+        expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+      });
+      expect(screen.getByText('Review Bill Cart')).toBeInTheDocument();
+      expect(screen.getAllByText('EDITED').length).toBeGreaterThan(0);
+    });
+
+    it('10. Repeated scan of same product retains existing row rate override and increments quantity', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Override rate to 70.00
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.change(rateInput, { target: { value: '70.00' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+      await waitFor(() => expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument());
+
+      // Next scan of 0042
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+
+      // Quantity increments to 2 and line amount becomes 140.00 (using overridden 70.00 rate)
+      await waitFor(() => {
+        const qtyInput = screen.getByLabelText('Quantity for Ponni Rice 1kg');
+        expect(qtyInput).toHaveValue('2');
+      });
+      expect(screen.getAllByText('₹140.00').length).toBeGreaterThan(0);
+      expect(screen.getByText('EDITED')).toBeInTheDocument();
+    });
+
+    it('11. Reset bill clears cart, next product scan uses master rate fresh without override', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Override rate to 70.00
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.change(rateInput, { target: { value: '70.00' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+      await waitFor(() => expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument());
+      expect(screen.getByText('EDITED')).toBeInTheDocument();
+
+      // Clear cart
+      const clearBtn = screen.getByRole('button', { name: 'Clear Cart' });
+      fireEvent.click(clearBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText('Terminal Ready for Billing')).toBeInTheDocument();
+      });
+
+      // Next product scan uses master rate fresh
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+      expect(screen.getAllByText('₹65.00').length).toBeGreaterThan(0);
+      expect(screen.queryByText('EDITED')).not.toBeInTheDocument();
+    });
+
+    it('12. Shortcuts hint bar shows F5 Rate and F6 Review footer shows F5 = Edit Rate', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      // Shortcut bar hint
+      expect(screen.getByText('F5').closest('.v2-hint-chip')).toHaveTextContent('F5 Rate');
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // Open F6 Review
+      fireEvent.keyDown(window, { key: 'F6' });
+      await waitFor(() => expect(screen.getByText('Review Bill Cart')).toBeInTheDocument());
+
+      // Review footer hint
+      expect(screen.getByText(/Edit Rate/i)).toBeInTheDocument();
     });
   });
 });

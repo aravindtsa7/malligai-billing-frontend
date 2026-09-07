@@ -98,6 +98,24 @@ export function sumAmounts(amounts: string[]): string {
 }
 
 /**
+ * Validates and normalizes an exact money rate string (up to 2 decimals) into a fixed 2-decimal string (e.g. "190" -> "190.00").
+ * Returns null if invalid or <= 0.
+ * Strictly uses exact BigInt scaling without IEEE 754 floating-point conversion (no Number(), parseFloat(), or parseInt()).
+ */
+export function normalizeMoneyRate(val: string): string | null {
+  if (!val || typeof val !== 'string') return null;
+  const trimmed = val.trim();
+  if (!/^\d{1,10}(\.\d{1,2})?$/.test(trimmed)) {
+    return null;
+  }
+  const cents = parseToScaledBigInt(trimmed, RATE_DECIMALS);
+  if (cents <= 0n) {
+    return null;
+  }
+  return formatScaledBigInt(cents, RATE_DECIMALS);
+}
+
+/**
  * Sums two quantity strings with 3 decimals scale and cleans trailing zeros.
  * Example: addQuantities("1", "1") => "2"
  * Example: addQuantities("2.500", "1") => "3.5"

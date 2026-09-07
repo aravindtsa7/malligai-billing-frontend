@@ -25,6 +25,7 @@ import {
   isStockAvailable,
   isQuantityWithinStock,
   formatQuantity,
+  normalizeMoneyRate,
 } from '../utils/decimal.ts';
 import {
   PrintableReceipt,
@@ -86,6 +87,13 @@ export const BillingPageV2: React.FC = () => {
   const [reviewEditingProductId, setReviewEditingProductId] = useState<number | null>(null);
   const [reviewTempQty, setReviewTempQty] = useState<string>('');
 
+  // Rate Edit Modal State (F5)
+  const [showRateModal, setShowRateModal] = useState<boolean>(false);
+  const [rateModalTarget, setRateModalTarget] = useState<CartItem | null>(null);
+  const [rateModalSource, setRateModalSource] = useState<'main' | 'review'>('main');
+  const [rateModalValue, setRateModalValue] = useState<string>('');
+  const [rateModalError, setRateModalError] = useState<string | null>(null);
+
   // Refs for State Synchronization, Element Focus & FIFO Scanner Queue
   const entryInputRef = useRef<HTMLInputElement>(null);
   const entryValueRef = useRef<string>('');
@@ -103,6 +111,12 @@ export const BillingPageV2: React.FC = () => {
   const reviewEditingProductIdRef = useRef<number | null>(null);
   const reviewSelectedIndexRef = useRef<number>(0);
   const isPrintingRef = useRef<boolean>(false);
+
+  // Rate modal refs
+  const rateInputRef = useRef<HTMLInputElement>(null);
+  const showRateModalRef = useRef<boolean>(false);
+  const rateModalTargetRef = useRef<CartItem | null>(null);
+  const rateModalSourceRef = useRef<'main' | 'review'>('main');
 
   // Latest references for global keyboard shortcuts
   const showReviewModalRef = useRef(showReviewModal);
@@ -128,15 +142,21 @@ export const BillingPageV2: React.FC = () => {
     reviewSelectedIndexRef.current = reviewSelectedIndex;
   }, [showReviewModal, savedBill, isSaving, reviewEditingProductId, reviewSelectedIndex]);
 
+  useEffect(() => {
+    showRateModalRef.current = showRateModal;
+    rateModalTargetRef.current = rateModalTarget;
+    rateModalSourceRef.current = rateModalSource;
+  }, [showRateModal, rateModalTarget, rateModalSource]);
+
   // Focus helper: Smart Product Entry
   const focusEntryInput = useCallback(() => {
-    if (savedBillRef.current || showReviewModalRef.current) return;
+    if (savedBillRef.current || showReviewModalRef.current || showRateModalRef.current) return;
     entryInputRef.current?.focus();
   }, []);
 
   // F2 Focus helper: select text for fast replacement
   const focusAndSelectEntryInput = useCallback(() => {
-    if (savedBillRef.current || showReviewModalRef.current) return;
+    if (savedBillRef.current || showReviewModalRef.current || showRateModalRef.current) return;
     entryInputRef.current?.focus();
     entryInputRef.current?.select();
   }, []);
@@ -291,7 +311,7 @@ export const BillingPageV2: React.FC = () => {
     if (e) {
       e.preventDefault();
     }
-    if (savedBillRef.current || isSavingRef.current || showReviewModalRef.current) return;
+    if (savedBillRef.current || isSavingRef.current || showReviewModalRef.current || showRateModalRef.current) return;
 
     const rawValue = (entryValueRef.current || entryInputRef.current?.value || entryValue).trim();
     if (!rawValue) return;
@@ -305,7 +325,11 @@ export const BillingPageV2: React.FC = () => {
 
     const selectedSuggestion = isSuggestionCurrent ? suggestions[highlightedIndex] : null;
 
-    // 1. Immediately clear DOM input, query tracking, refs, and close suggestions
+    // 1. Immediately clear DOM input, pending search timeout, query tracking, refs, and close suggestions
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = null;
+    }
     entryValueRef.current = '';
     if (entryInputRef.current) {
       entryInputRef.current.value = '';
@@ -549,7 +573,8 @@ export const BillingPageV2: React.FC = () => {
 
   // Calculate Line Item Amounts and Grand Total using Exact Decimal Math
   const lineItemsCalculated = cart.map((item) => {
-    const rate = getProductRateForType(item, rateType);
+    const rate = item.unitRateOverride ?? getProductRateForType(item, rateType);
+    const isOverridden = !!item.unitRateOverride;
     const isValidFormat = isValidPositiveDecimal(item.quantity);
     const isWithinStock = isQuantityWithinStock(item.quantity, item.currentStock);
     const isValidQty = isValidFormat && isWithinStock;
@@ -560,6 +585,7 @@ export const BillingPageV2: React.FC = () => {
       lineAmount: amount,
       isValidQty,
       isExceedingStock: isValidFormat && !isWithinStock,
+      isOverridden,
     };
   });
 
@@ -597,15 +623,26 @@ export const BillingPageV2: React.FC = () => {
     const payload: CreateBillInput = {
       rateType,
       paymentType,
-      items: cartSnapshot.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity.trim(),
-      })),
+      items: cartSnapshot.map((item) => {
+        if (item.unitRateOverride) {
+          return {
+            productId: item.productId,
+            quantity: item.quantity.trim(),
+            unitRateOverride: item.unitRateOverride,
+          };
+        }
+        return {
+          productId: item.productId,
+          quantity: item.quantity.trim(),
+          expectedUnitRate: getProductRateForType(item, rateType),
+        };
+      }),
     };
 
     try {
       const createdBill = await billingApi.createBill(payload);
       setSavedBill(createdBill);
+      savedBillRef.current = createdBill;
       setShowReviewModal(false);
       showReviewModalRef.current = false;
       reviewEditingProductIdRef.current = null;
@@ -615,8 +652,52 @@ export const BillingPageV2: React.FC = () => {
       setCart([]);
       setFeedback(null);
     } catch (err: unknown) {
-      const errorMsg = getApiErrorMessage(err, 'Failed to save bill.');
-      setSaveError(errorMsg);
+      let isConflict = false;
+      let conflictMsg = '';
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        isConflict = true;
+        conflictMsg = err.response.data?.message || 'A product rate has changed.';
+      } else if (err && typeof err === 'object' && 'response' in err) {
+        const res = (err as { response?: { status?: number; data?: { message?: string } } }).response;
+        if (res?.status === 409) {
+          isConflict = true;
+          conflictMsg = res.data?.message || 'A product rate has changed.';
+        }
+      }
+
+      if (isConflict) {
+        // Optimistic rate consistency conflict: refresh cart item rates from backend
+        try {
+          const freshProducts = await Promise.all(
+            cartSnapshot.map((item) => productApi.getProductById(item.productId).catch(() => null))
+          );
+          const freshMap = new Map(
+            freshProducts.filter((p): p is Product => p !== null).map((p) => [p.id, p])
+          );
+          const refreshedCart = cartRef.current.map((item) => {
+            const p = freshMap.get(item.productId);
+            if (!p) return item;
+            return {
+              ...item,
+              normalRate: p.normalRate,
+              retailRate: p.retailRate,
+              functionRate: p.functionRate,
+              currentStock: p.currentStock,
+            };
+          });
+          cartRef.current = refreshedCart;
+          setCart(refreshedCart);
+        } catch {
+          // ignore refresh error
+        }
+        setSaveError(
+          conflictMsg ||
+            'Rate was changed by another user before bill save. Product rates refreshed. Please review and save again.'
+        );
+      } else {
+        const errorMsg = getApiErrorMessage(err, 'Failed to save bill.');
+        setSaveError(errorMsg);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -687,21 +768,142 @@ export const BillingPageV2: React.FC = () => {
     }, 50);
   }, []);
 
+  // F5 Shortcut: Open Edit Bill Rate Modal
+  const handleF5EditRate = useCallback(() => {
+    if (savedBillRef.current || isSavingRef.current || showRateModalRef.current) return;
+
+    if (showReviewModalRef.current) {
+      if (reviewEditingProductIdRef.current !== null) {
+        return;
+      }
+      const target = cartRef.current[reviewSelectedIndexRef.current];
+      if (!target) return;
+
+      const currentRate = target.unitRateOverride ?? getProductRateForType(target, rateType);
+      setRateModalTarget(target);
+      rateModalTargetRef.current = target;
+      setRateModalSource('review');
+      rateModalSourceRef.current = 'review';
+      setRateModalValue(currentRate);
+      setRateModalError(null);
+      setShowRateModal(true);
+      showRateModalRef.current = true;
+      return;
+    }
+
+    const targetId = lastAddedProductIdRef.current ?? lastAddedProductId;
+    const target = targetId ? cartRef.current.find((it) => it.productId === targetId) : null;
+
+    if (!target || cartRef.current.length === 0) {
+      showFeedback('error', 'Cart is empty. Add a product first to edit rate (F5).');
+      focusEntryInput();
+      return;
+    }
+
+    const currentRate = target.unitRateOverride ?? getProductRateForType(target, rateType);
+    setRateModalTarget(target);
+    rateModalTargetRef.current = target;
+    setRateModalSource('main');
+    rateModalSourceRef.current = 'main';
+    setRateModalValue(currentRate);
+    setRateModalError(null);
+    setShowRateModal(true);
+    showRateModalRef.current = true;
+  }, [rateType, lastAddedProductId, showFeedback, focusEntryInput]);
+
+  const handleCloseRateModal = useCallback(() => {
+    setShowRateModal(false);
+    showRateModalRef.current = false;
+    setRateModalTarget(null);
+    rateModalTargetRef.current = null;
+    setRateModalError(null);
+    if (rateModalSourceRef.current === 'review') {
+      setShowReviewModal(true);
+      showReviewModalRef.current = true;
+    } else {
+      setTimeout(() => {
+        entryInputRef.current?.focus();
+      }, 50);
+    }
+  }, []);
+
+  const handleApplyRateUpdate = useCallback((e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!rateModalTargetRef.current) return;
+
+    const normalizedNewRate = normalizeMoneyRate(rateModalValue);
+    if (!normalizedNewRate) {
+      setRateModalError('Please enter a valid rate greater than 0 with up to 2 decimal places.');
+      rateInputRef.current?.focus();
+      return;
+    }
+
+    const targetProduct = rateModalTargetRef.current;
+    const newRate = normalizedNewRate;
+
+    // Apply bill-level rate override to THIS cart item only.
+    // Product Master object fields remain unchanged!
+    const updatedCart = cartRef.current.map((item) => {
+      if (item.productId === targetProduct.productId) {
+        return {
+          ...item,
+          unitRateOverride: newRate,
+        };
+      }
+      return item;
+    });
+
+    cartRef.current = updatedCart;
+    setCart(updatedCart);
+
+    setShowRateModal(false);
+    showRateModalRef.current = false;
+    setRateModalTarget(null);
+    rateModalTargetRef.current = null;
+    setRateModalError(null);
+
+    showFeedback(
+      'success',
+      `Applied bill rate ₹${newRate} for "${targetProduct.productName}".`
+    );
+
+    if (rateModalSourceRef.current === 'review') {
+      setShowReviewModal(true);
+      showReviewModalRef.current = true;
+    } else {
+      setTimeout(() => {
+        entryInputRef.current?.focus();
+      }, 50);
+    }
+  }, [rateModalValue, showFeedback]);
+
+  useEffect(() => {
+    if (showRateModal) {
+      setTimeout(() => {
+        rateInputRef.current?.focus();
+        rateInputRef.current?.select();
+      }, 50);
+    }
+  }, [showRateModal]);
+
   // Ensure Smart Product Entry usability & focus are safely restored whenever review modal closes
   const prevShowReviewModalRef = useRef(showReviewModal);
   useEffect(() => {
-    if (prevShowReviewModalRef.current && !showReviewModal && !savedBill) {
+    if (prevShowReviewModalRef.current && !showReviewModal && !savedBill && !showRateModal) {
       setTimeout(() => {
         entryInputRef.current?.focus();
       }, 50);
     }
     prevShowReviewModalRef.current = showReviewModal;
-  }, [showReviewModal, savedBill]);
+  }, [showReviewModal, savedBill, showRateModal]);
 
-  // Keyboard Shortcuts (F2, F3, F4, Ctrl+Enter, F6, F8, F9, Escape)
+  // Keyboard Shortcuts (F2, F3, F4, Ctrl+Enter, F5, F6, F8, F9, Escape)
   const handleSaveBillRef = useRef(handleSaveBill);
   const handleStartNewBillRef = useRef(handleStartNewBill);
   const handleF3EditQuantityRef = useRef(handleF3EditQuantity);
+  const handleF5EditRateRef = useRef(handleF5EditRate);
+  const handleCloseRateModalRef = useRef(handleCloseRateModal);
+  const handleApplyRateUpdateRef = useRef(handleApplyRateUpdate);
   const handleOpenReviewModalRef = useRef(handleOpenReviewModal);
   const handleCloseReviewModalRef = useRef(handleCloseReviewModal);
   const handleRemoveCartItemRef = useRef(handleRemoveCartItem);
@@ -712,6 +914,9 @@ export const BillingPageV2: React.FC = () => {
     handleSaveBillRef.current = handleSaveBill;
     handleStartNewBillRef.current = handleStartNewBill;
     handleF3EditQuantityRef.current = handleF3EditQuantity;
+    handleF5EditRateRef.current = handleF5EditRate;
+    handleCloseRateModalRef.current = handleCloseRateModal;
+    handleApplyRateUpdateRef.current = handleApplyRateUpdate;
     handleOpenReviewModalRef.current = handleOpenReviewModal;
     handleCloseReviewModalRef.current = handleCloseReviewModal;
     handleRemoveCartItemRef.current = handleRemoveCartItem;
@@ -722,6 +927,7 @@ export const BillingPageV2: React.FC = () => {
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const isPlainF4 = e.key === 'F4' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+      const isPlainF5 = e.key === 'F5' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
       const isPlainF6 = e.key === 'F6' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
       const isPlainF9 = e.key === 'F9' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
       const isCtrlEnter = (e.ctrlKey || e.metaKey) && e.key === 'Enter';
@@ -743,6 +949,18 @@ export const BillingPageV2: React.FC = () => {
         return;
       }
 
+      // If Rate Edit Modal is open, Enter applies, Escape cancels
+      if (showRateModalRef.current) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleCloseRateModalRef.current();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          handleApplyRateUpdateRef.current();
+        }
+        return;
+      }
+
       // If Bill is Saved, Enter or Escape starts a new bill
       if (savedBillRef.current) {
         if (e.key === 'Enter' || e.key === 'Escape') {
@@ -760,6 +978,9 @@ export const BillingPageV2: React.FC = () => {
         } else if (isPlainF4 || isCtrlEnter) {
           e.preventDefault();
           handleSaveBillRef.current();
+        } else if (isPlainF5) {
+          e.preventDefault();
+          handleF5EditRateRef.current();
         } else if (reviewEditingProductIdRef.current === null) {
           // Row navigation and row removal within review table when not editing quantity
           if (e.key === 'ArrowDown') {
@@ -796,6 +1017,9 @@ export const BillingPageV2: React.FC = () => {
       } else if (isPlainF4 || isCtrlEnter) {
         e.preventDefault();
         handleSaveBillRef.current();
+      } else if (isPlainF5) {
+        e.preventDefault();
+        handleF5EditRateRef.current();
       } else if (isPlainF6) {
         e.preventDefault();
         handleOpenReviewModalRef.current();
@@ -840,7 +1064,7 @@ export const BillingPageV2: React.FC = () => {
                 value={entryValue}
                 onChange={handleEntryChange}
                 onKeyDown={handleEntryKeyDown}
-                disabled={isSaving || !!savedBill || showReviewModal}
+                disabled={isSaving || !!savedBill || showReviewModal || showRateModal}
                 autoComplete="off"
                 aria-label="Smart Product Entry"
               />
@@ -849,9 +1073,9 @@ export const BillingPageV2: React.FC = () => {
                 <button
                   type="button"
                   className="billing-v2-clear-btn"
-                  disabled={isSaving || !!savedBill || showReviewModal}
+                  disabled={isSaving || !!savedBill || showReviewModal || showRateModal}
                   onClick={() => {
-                    if (isSaving || !!savedBill || showReviewModal) return;
+                    if (isSaving || !!savedBill || showReviewModal || showRateModal) return;
                     setEntryValue('');
                     setShowSuggestions(false);
                     focusEntryInput();
@@ -865,7 +1089,7 @@ export const BillingPageV2: React.FC = () => {
               <button
                 type="submit"
                 className="btn btn-primary billing-v2-enter-btn"
-                disabled={!entryValue.trim() || isSaving || !!savedBill || showReviewModal}
+                disabled={!entryValue.trim() || isSaving || !!savedBill || showReviewModal || showRateModal}
               >
                 {isSearching ? <span className="btn-spinner" /> : 'Enter ↵'}
               </button>
@@ -925,6 +1149,7 @@ export const BillingPageV2: React.FC = () => {
             <span className="v2-hint-chip"><strong>F2</strong> Smart Entry</span>
             <span className="v2-hint-chip"><strong>F3</strong> Edit Last Qty</span>
             <span className="v2-hint-chip"><strong>F4 / Ctrl+Enter</strong> Save Bill</span>
+            <span className="v2-hint-chip"><strong>F5</strong> Rate</span>
             <span className="v2-hint-chip"><strong>F6</strong> Review</span>
             <span className="v2-hint-chip"><strong>F8</strong> Receipt EN/தமிழ்</span>
             <span className="v2-hint-chip"><strong>F9</strong> Print Receipt</span>
@@ -1037,7 +1262,14 @@ export const BillingPageV2: React.FC = () => {
                         />
                       </td>
                       <td className="td-unit text-center font-mono text-muted">{item.unit}</td>
-                      <td className="td-rate text-right font-mono font-semibold">₹{item.displayRate}</td>
+                      <td className="td-rate text-right font-mono font-semibold">
+                        <span>₹{item.displayRate}</span>
+                        {item.isOverridden && (
+                          <span className="v2-rate-edited-tag font-sans" title="Rate modified for this bill only">
+                            EDITED
+                          </span>
+                        )}
+                      </td>
                       <td className="td-amount text-right font-mono font-bold">₹{item.lineAmount}</td>
                       <td className="td-action text-center">
                         <button
@@ -1232,7 +1464,14 @@ export const BillingPageV2: React.FC = () => {
                             <span className="review-item-code font-mono text-muted"> [{item.productCode}]</span>
                           </div>
                         </td>
-                        <td className="td-cart-rate text-right font-mono font-semibold">₹{item.displayRate}</td>
+                        <td className="td-cart-rate text-right font-mono font-semibold">
+                          <span>₹{item.displayRate}</span>
+                          {item.isOverridden && (
+                            <span className="v2-rate-edited-tag font-sans" title="Rate modified for this bill only">
+                              EDITED
+                            </span>
+                          )}
+                        </td>
                         <td className="td-cart-qty text-center">
                           {isEditing ? (
                             <input
@@ -1297,6 +1536,7 @@ export const BillingPageV2: React.FC = () => {
               <div className="review-footer-hints">
                 <span className="hint-tag"><strong>↑ / ↓</strong> = Navigate</span>
                 <span className="hint-tag"><strong>Enter</strong> = Edit Qty</span>
+                <span className="hint-tag"><strong>F5</strong> = Edit Rate</span>
                 <span className="hint-tag"><strong>Delete</strong> = Remove</span>
                 <span className="hint-tag"><strong>Esc / F6</strong> = Close</span>
               </div>
@@ -1321,6 +1561,117 @@ export const BillingPageV2: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Bill Rate Modal (F5) */}
+      {showRateModal && rateModalTarget && !savedBill && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Edit Bill Rate Modal">
+          <div className="modal-dialog modal-rate-dialog" tabIndex={-1}>
+            <div className="modal-header rate-modal-header">
+              <div className="rate-modal-title-box">
+                <div className="terminal-badge">F5 RATE EDIT</div>
+                <h3 className="modal-title">EDIT BILL RATE</h3>
+              </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={handleCloseRateModal}
+                title="Cancel (Esc)"
+              >
+                ✕
+              </button>
+            </div>
+
+            {rateModalError && (
+              <div className="alert alert-error" role="alert" style={{ margin: '8px 16px 0' }}>
+                <span>{rateModalError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleApplyRateUpdate} className="rate-modal-form">
+              <div className="rate-modal-body">
+                <div className="rate-modal-product-info">
+                  <div className="rate-modal-product-name font-semibold">
+                    {rateModalTarget.productName}
+                    {rateModalTarget.tamilName && (
+                      <span className="font-tamil text-muted"> ({rateModalTarget.tamilName})</span>
+                    )}
+                  </div>
+                  <div className="rate-modal-product-meta">
+                    <span className="font-mono text-muted">Code: {rateModalTarget.productCode}</span>
+                    <span>•</span>
+                    <span className="rate-modal-badge">{rateType} Rate</span>
+                  </div>
+                </div>
+
+                <div className="rate-modal-rates-grid">
+                  <div className="rate-modal-field">
+                    <label className="rate-modal-label">Master Rate ({rateType})</label>
+                    <div className="rate-modal-current font-mono">
+                      ₹{getProductRateForType(rateModalTarget, rateType)}
+                    </div>
+                  </div>
+
+                  <div className="rate-modal-field">
+                    <label htmlFor="billing-v2-new-rate-input" className="rate-modal-label">Bill Rate (₹)</label>
+                    <input
+                      id="billing-v2-new-rate-input"
+                      ref={rateInputRef}
+                      type="text"
+                      inputMode="decimal"
+                      className="form-input font-mono rate-modal-input"
+                      value={rateModalValue}
+                      onChange={(e) => {
+                        setRateModalError(null);
+                        setRateModalValue(e.target.value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleApplyRateUpdate();
+                        } else if (e.key === 'Escape') {
+                          e.preventDefault();
+                          handleCloseRateModal();
+                        }
+                      }}
+                      placeholder="0.00"
+                      autoComplete="off"
+                      aria-label="Bill Selling Rate"
+                    />
+                  </div>
+                </div>
+
+                <div className="rate-modal-notice">
+                  ℹ️ This change applies to this bill only.
+                </div>
+              </div>
+
+              <div className="modal-footer rate-modal-footer">
+                <div className="rate-footer-hints">
+                  <span className="hint-tag"><strong>Enter</strong> = Apply</span>
+                  <span className="hint-tag"><strong>Esc</strong> = Cancel</span>
+                </div>
+                <div className="rate-footer-actions">
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={handleCloseRateModal}
+                  >
+                    Cancel (Esc)
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-apply-rate"
+                    disabled={!rateModalValue.trim()}
+                  >
+                    Apply Rate ↵
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
 
       {/* Bill Success Receipt Modal */}
       {savedBill && (
