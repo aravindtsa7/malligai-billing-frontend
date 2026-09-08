@@ -949,8 +949,13 @@ export const BillingPageV2: React.FC = () => {
         return;
       }
 
-      // If Rate Edit Modal is open, Enter applies, Escape cancels
+      // If Rate Edit Modal is open, Enter applies, Escape cancels, F5 is consumed (prevent browser refresh)
       if (showRateModalRef.current) {
+        if (isPlainF5) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
         if (e.key === 'Escape') {
           e.preventDefault();
           handleCloseRateModalRef.current();
@@ -1627,10 +1632,15 @@ export const BillingPageV2: React.FC = () => {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
+                          e.stopPropagation();
                           handleApplyRateUpdate();
                         } else if (e.key === 'Escape') {
                           e.preventDefault();
+                          e.stopPropagation();
                           handleCloseRateModal();
+                        } else if (e.key === 'F5' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                          e.preventDefault();
+                          e.stopPropagation();
                         }
                       }}
                       placeholder="0.00"

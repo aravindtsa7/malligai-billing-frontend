@@ -1776,5 +1776,241 @@ describe('Create Bill V2 — Phase 1 Verification Suite', () => {
       // Review footer hint
       expect(screen.getByText(/Edit Rate/i)).toBeInTheDocument();
     });
+
+    it('13. F6 -> F5 -> Escape: closes only rate modal, keeps review modal open, preserves selected row, and does not start quantity edit', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      mocks.getProductByScanValue.mockResolvedValueOnce(sampleProductB);
+      fireEvent.change(input, { target: { value: '0043' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Sugar 1kg')).toBeInTheDocument());
+
+      // Open F6 Review Modal
+      fireEvent.keyDown(window, { key: 'F6' });
+      await waitFor(() => expect(screen.getByText('Review Bill Cart')).toBeInTheDocument());
+
+      const reviewModal = screen.getByRole('dialog', { name: 'Cart Review Modal' });
+      // Selected row 0 is Ponni Rice (Code 0042)
+      expect(within(reviewModal).getByText('Ponni Rice 1kg').closest('tr')).toHaveClass('review-row-selected');
+
+      // Press F5 to open rate modal from review
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      expect(screen.getByText('Code: 0042')).toBeInTheDocument();
+
+      // Press Escape while focused on the rate input
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.keyDown(rateInput, { key: 'Escape' });
+
+      // Rate modal must close
+      await waitFor(() => {
+        expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+      });
+
+      // Review modal must remain open (not closed by bubbling Escape)
+      expect(screen.getByText('Review Bill Cart')).toBeInTheDocument();
+
+      // Selected row must be preserved
+      const updatedReviewModal = screen.getByRole('dialog', { name: 'Cart Review Modal' });
+      expect(within(updatedReviewModal).getByText('Ponni Rice 1kg').closest('tr')).toHaveClass('review-row-selected');
+
+      // Review inline quantity-edit input/mode must NOT be activated
+      expect(within(updatedReviewModal).queryByRole('textbox', { name: /edit quantity for/i })).not.toBeInTheDocument();
+      expect(updatedReviewModal.querySelector('.review-qty-inline-input')).toBeNull();
+    });
+
+    it('14. F6 -> F5 -> valid rate -> Enter: applies bill rate override, keeps review modal open, preserves selected row, and does not activate quantity edit', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      mocks.getProductByScanValue.mockResolvedValueOnce(sampleProductB);
+      fireEvent.change(input, { target: { value: '0043' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Sugar 1kg')).toBeInTheDocument());
+
+      // Open F6 Review Modal
+      fireEvent.keyDown(window, { key: 'F6' });
+      await waitFor(() => expect(screen.getByText('Review Bill Cart')).toBeInTheDocument());
+
+      const reviewModal = screen.getByRole('dialog', { name: 'Cart Review Modal' });
+      // Selected row 0 is Ponni Rice
+      expect(within(reviewModal).getByText('Ponni Rice 1kg').closest('tr')).toHaveClass('review-row-selected');
+
+      // Press F5 to open rate modal from review
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      expect(screen.getByText('Code: 0042')).toBeInTheDocument();
+
+      // Enter a valid new rate and press Enter in the rate input
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.change(rateInput, { target: { value: '72.50' } });
+      fireEvent.keyDown(rateInput, { key: 'Enter' });
+
+      // Rate modal must close
+      await waitFor(() => {
+        expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+      });
+
+      // Review modal must remain open (not affected by bubbling Enter)
+      expect(screen.getByText('Review Bill Cart')).toBeInTheDocument();
+
+      // Rate override applied to Ponni Rice
+      const updatedReviewModal = screen.getByRole('dialog', { name: 'Cart Review Modal' });
+      expect(within(updatedReviewModal).getAllByText('₹72.50').length).toBeGreaterThan(0);
+      expect(within(updatedReviewModal).getAllByText('EDITED').length).toBeGreaterThan(0);
+
+      // Selected row must be preserved
+      expect(within(updatedReviewModal).getByText('Ponni Rice 1kg').closest('tr')).toHaveClass('review-row-selected');
+
+      // Review inline quantity-edit input/mode must NOT be activated
+      expect(within(updatedReviewModal).queryByRole('textbox', { name: /edit quantity for/i })).not.toBeInTheDocument();
+      expect(updatedReviewModal.querySelector('.review-qty-inline-input')).toBeNull();
+    });
+
+    it('15. pressing F5 again while rate modal is open prevents browser refresh and preserves cart', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      // 3. Press F5
+      fireEvent.keyDown(window, { key: 'F5' });
+
+      // 4. Assert EDIT BILL RATE modal visible
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      expect(screen.getByText('Code: 0042')).toBeInTheDocument();
+
+      // 5. Dispatch a cancelable second F5 KeyboardEvent on window
+      const secondF5Event = new KeyboardEvent('keydown', {
+        key: 'F5',
+        code: 'F5',
+        bubbles: true,
+        cancelable: true,
+      });
+      window.dispatchEvent(secondF5Event);
+
+      // 6. Assert event.defaultPrevented === true
+      expect(secondF5Event.defaultPrevented).toBe(true);
+
+      // Also dispatch on active rate input
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      const rateInputF5Event = new KeyboardEvent('keydown', {
+        key: 'F5',
+        code: 'F5',
+        bubbles: true,
+        cancelable: true,
+      });
+      rateInput.dispatchEvent(rateInputF5Event);
+      expect(rateInputF5Event.defaultPrevented).toBe(true);
+
+      // 7. Assert rate modal is still visible
+      expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Edit Bill Rate Modal' })).toBeInTheDocument();
+
+      // 8. Assert cart row still exists in cart table
+      const cartTable = document.querySelector('.billing-v2-table') as HTMLElement;
+      expect(within(cartTable).getByText('Ponni Rice 1kg')).toBeInTheDocument();
+
+      // 9. Assert quantity/rate unchanged
+      const qtyInput = screen.getByLabelText('Quantity for Ponni Rice 1kg') as HTMLInputElement;
+      expect(qtyInput.value).toBe('1');
+      expect(within(cartTable).getAllByText('₹65.00').length).toBeGreaterThan(0);
+      expect(within(cartTable).queryByText('EDITED')).not.toBeInTheDocument();
+
+      // 10. Assert no quantity edit mode starts
+      expect(document.querySelector('.review-qty-inline-input')).toBeNull();
+
+      // 11. Assert no save/clear action occurs
+      expect(mocks.createBill).not.toHaveBeenCalled();
+      expect(screen.queryByText(/BILL SAVED SUCCESSFULLY/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Cart is empty/i)).not.toBeInTheDocument();
+    });
+
+    it('16. F6 -> F5 -> F5: pressing F5 again while rate modal is open from review modal prevents browser refresh, preserves review context and cart', async () => {
+      window.history.pushState({}, '', '/billing-v2');
+      render(<App />);
+
+      const input = screen.getByPlaceholderText('Scan barcode or type code / product name...');
+      fireEvent.change(input, { target: { value: '0042' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Ponni Rice 1kg')).toBeInTheDocument());
+
+      mocks.getProductByScanValue.mockResolvedValueOnce(sampleProductB);
+      fireEvent.change(input, { target: { value: '0043' } });
+      fireEvent.submit(input.closest('form')!);
+      await waitFor(() => expect(screen.getByText('Sugar 1kg')).toBeInTheDocument());
+
+      // Open F6 Review Modal
+      fireEvent.keyDown(window, { key: 'F6' });
+      await waitFor(() => expect(screen.getByText('Review Bill Cart')).toBeInTheDocument());
+
+      const reviewModal = screen.getByRole('dialog', { name: 'Cart Review Modal' });
+      // Selected row 0 is Ponni Rice
+      expect(within(reviewModal).getByText('Ponni Rice 1kg').closest('tr')).toHaveClass('review-row-selected');
+
+      // Press F5 to open rate modal from review
+      fireEvent.keyDown(window, { key: 'F5' });
+      await waitFor(() => expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument());
+      expect(screen.getByText('Code: 0042')).toBeInTheDocument();
+
+      // Press F5 again while rate modal is open
+      const secondF5Event = new KeyboardEvent('keydown', {
+        key: 'F5',
+        code: 'F5',
+        bubbles: true,
+        cancelable: true,
+      });
+      window.dispatchEvent(secondF5Event);
+
+      // Expected:
+      // - defaultPrevented is true (no browser refresh)
+      expect(secondF5Event.defaultPrevented).toBe(true);
+
+      // - Rate modal remains open
+      expect(screen.getByText('EDIT BILL RATE')).toBeInTheDocument();
+      expect(screen.getByText('Code: 0042')).toBeInTheDocument();
+
+      // Close rate modal with Escape to check review context
+      const rateInput = screen.getByLabelText('Bill Selling Rate');
+      fireEvent.keyDown(rateInput, { key: 'Escape' });
+      await waitFor(() => {
+        expect(screen.queryByText('EDIT BILL RATE')).not.toBeInTheDocument();
+      });
+
+      // Review modal remains open
+      expect(screen.getByText('Review Bill Cart')).toBeInTheDocument();
+      const updatedReviewModal = screen.getByRole('dialog', { name: 'Cart Review Modal' });
+
+      // Review context/selected row preserved (Ponni Rice row 0)
+      expect(within(updatedReviewModal).getByText('Ponni Rice 1kg').closest('tr')).toHaveClass('review-row-selected');
+
+      // Review inline quantity-edit input/mode must NOT be activated
+      expect(within(updatedReviewModal).queryByRole('textbox', { name: /edit quantity for/i })).not.toBeInTheDocument();
+      expect(updatedReviewModal.querySelector('.review-qty-inline-input')).toBeNull();
+
+      // Cart unchanged
+      expect(within(updatedReviewModal).getByText('Ponni Rice 1kg')).toBeInTheDocument();
+      expect(within(updatedReviewModal).getByText('Sugar 1kg')).toBeInTheDocument();
+      expect(within(updatedReviewModal).getAllByText('₹65.00').length).toBeGreaterThan(0);
+      expect(within(updatedReviewModal).getAllByText('₹42.00').length).toBeGreaterThan(0);
+      expect(within(updatedReviewModal).queryByText('EDITED')).not.toBeInTheDocument();
+
+      // No save or clear occurred
+      expect(mocks.createBill).not.toHaveBeenCalled();
+    });
   });
 });
