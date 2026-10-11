@@ -324,7 +324,7 @@ export const StockManagementPage: React.FC = () => {
       );
 
       triggerSuccessMessage(
-        `Stock in recorded successfully for "${result.product.productName}". Added: +${formatQuantity(result.transaction.quantity)} ${result.product.unit} (New Stock: ${formatQuantity(result.product.currentStock)} ${result.product.unit}).`
+        `Stock in recorded successfully for "${result.product.productName}". Added: +${formatQuantity(result.transaction.quantity)} ${result.product.unit?.shortName || ''} (New Stock: ${formatQuantity(result.product.currentStock)} ${result.product.unit?.shortName || ''}).`
       );
 
       setStockInProduct(null);
@@ -422,7 +422,7 @@ export const StockManagementPage: React.FC = () => {
         result.transaction.type === 'ADJUSTMENT_IN' ? 'Adjustment In' : 'Adjustment Out';
 
       triggerSuccessMessage(
-        `${typeLabel} recorded successfully for "${result.product.productName}". Adjusted: ${sign}${formatQuantity(result.transaction.quantity)} ${result.product.unit} (New Stock: ${formatQuantity(result.product.currentStock)} ${result.product.unit}).`
+        `${typeLabel} recorded successfully for "${result.product.productName}". Adjusted: ${sign}${formatQuantity(result.transaction.quantity)} ${result.product.unit?.shortName || ''} (New Stock: ${formatQuantity(result.product.currentStock)} ${result.product.unit?.shortName || ''}).`
       );
 
       setAdjustmentProduct(null);
@@ -750,12 +750,12 @@ export const StockManagementPage: React.FC = () => {
                         </td>
                       )}
                       <td className="td-unit">
-                        <span className="unit-badge">{product.unit}</span>
+                        <span className="unit-badge">{product.unit?.name || ''}</span>
                       </td>
                       <td className="td-stock text-right font-mono">
                         <span className="stock-highlight-value">
                           {formatQuantity(product.currentStock)}{' '}
-                          <span className="stock-unit">{product.unit}</span>
+                          <span className="stock-unit">{product.unit?.shortName || ''}</span>
                         </span>
                       </td>
                       <td className="td-status text-center">
@@ -892,14 +892,14 @@ export const StockManagementPage: React.FC = () => {
                     <div className="modal-summary-item">
                       <span className="modal-summary-label">Unit of Measure</span>
                       <span className="modal-summary-val">
-                        <span className="unit-badge">{stockInProduct.unit}</span>
+                        <span className="unit-badge">{stockInProduct.unit?.name || ''}</span>
                       </span>
                     </div>
                     <div className="modal-summary-item modal-summary-stock-item">
                       <span className="modal-summary-label">Current Stock on Hand</span>
                       <span className="modal-summary-stock-val font-mono font-semibold">
                         {formatQuantity(stockInProduct.currentStock)}{' '}
-                        <span className="stock-unit">{stockInProduct.unit}</span>
+                        <span className="stock-unit">{stockInProduct.unit?.shortName || ''}</span>
                       </span>
                     </div>
                   </div>
@@ -912,7 +912,7 @@ export const StockManagementPage: React.FC = () => {
 
                 <div className="form-group">
                   <label htmlFor="stockInQuantity">
-                    Quantity to Add ({stockInProduct.unit}) <span className="required-star">*</span>
+                    Quantity to Add ({stockInProduct.unit?.shortName || ''}) <span className="required-star">*</span>
                   </label>
                   <input
                     id="stockInQuantity"
@@ -1044,14 +1044,14 @@ export const StockManagementPage: React.FC = () => {
                     <div className="modal-summary-item">
                       <span className="modal-summary-label">Unit of Measure</span>
                       <span className="modal-summary-val">
-                        <span className="unit-badge">{adjustmentProduct.unit}</span>
+                        <span className="unit-badge">{adjustmentProduct.unit?.name || ''}</span>
                       </span>
                     </div>
                     <div className="modal-summary-item modal-summary-stock-item">
                       <span className="modal-summary-label">Current Stock on Hand</span>
                       <span className="modal-summary-stock-val font-mono font-semibold">
                         {formatQuantity(adjustmentProduct.currentStock)}{' '}
-                        <span className="stock-unit">{adjustmentProduct.unit}</span>
+                        <span className="stock-unit">{adjustmentProduct.unit?.shortName || ''}</span>
                       </span>
                     </div>
                   </div>
@@ -1104,7 +1104,7 @@ export const StockManagementPage: React.FC = () => {
 
                 <div className="form-group">
                   <label htmlFor="adjustmentQuantity">
-                    Adjustment Quantity ({adjustmentProduct.unit}) <span className="required-star">*</span>
+                    Adjustment Quantity ({adjustmentProduct.unit?.shortName || ''}) <span className="required-star">*</span>
                   </label>
                   <input
                     id="adjustmentQuantity"

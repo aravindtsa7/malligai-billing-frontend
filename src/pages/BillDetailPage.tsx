@@ -538,10 +538,10 @@ export const BillDetailPage: React.FC = () => {
                         </td>
                         <td className="td-item-name font-medium">{item.productName}</td>
                         <td className="td-item-unit">
-                          <span className="unit-badge">{item.unit}</span>
+                          <span className="unit-badge">{item.unitName || item.unit}</span>
                         </td>
                         <td className="td-item-qty text-center font-mono font-semibold">
-                          {formatQuantity(item.quantity)} <span className="stock-unit">{item.unit}</span>
+                          {formatQuantity(item.quantity)} <span className="stock-unit">{item.unitShortName || item.unit}</span>
                         </td>
                         <td className="td-item-rate-type text-center">
                           <span className="badge badge-subtle">{item.rateType}</span>

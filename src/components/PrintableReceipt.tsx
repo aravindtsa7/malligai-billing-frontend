@@ -173,7 +173,7 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({
                       </td>
                       <td className="td-r-rate text-right font-mono">{item.rate}</td>
                       <td className="td-r-qty text-center font-mono">
-                        {formatQuantity(item.quantity)} {item.unit}
+                        {formatQuantity(item.quantity)} {item.unitShortName || item.unit}
                       </td>
                       <td className="td-r-amount text-right font-mono">{item.amount}</td>
                     </tr>
@@ -202,7 +202,7 @@ export const PrintableReceipt: React.FC<PrintableReceiptProps> = ({
                     <div className="receipt-58mm-item-name">{displayName}</div>
                     <div className="receipt-58mm-item-details-row font-mono">
                       <span className="receipt-58mm-rate">{item.rate}</span>
-                      <span className="receipt-58mm-qty">{formatQuantity(item.quantity)} {item.unit}</span>
+                      <span className="receipt-58mm-qty">{formatQuantity(item.quantity)} {item.unitShortName || item.unit}</span>
                       <span className="receipt-58mm-amount font-bold">{item.amount}</span>
                     </div>
                   </div>

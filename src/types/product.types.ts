@@ -1,8 +1,5 @@
 import type { SerializedCategoryRef } from './category.types.ts';
-
-export type Unit = 'KG' | 'GRAM' | 'LITRE' | 'ML' | 'PIECE' | 'PACKET' | 'BOX';
-
-export const UNITS: Unit[] = ['KG', 'GRAM', 'LITRE', 'ML', 'PIECE', 'PACKET', 'BOX'];
+import type { SerializedUnitRef } from './unit.types.ts';
 
 export interface Product {
   id: number;
@@ -12,7 +9,8 @@ export interface Product {
   tamilName: string | null;
   categoryId: number;
   category?: SerializedCategoryRef;
-  unit: Unit;
+  unitId: number;
+  unit: SerializedUnitRef;
   mrpRate: string;
   originalRate: string;
   normalRate: string;
@@ -30,7 +28,7 @@ export interface CreateProductInput {
   productName: string;
   tamilName?: string | null;
   categoryId: number;
-  unit: Unit;
+  unitId: number;
   mrpRate: string;
   normalRate: string;
   originalRate?: string;
@@ -45,7 +43,7 @@ export interface UpdateProductInput {
   productName?: string;
   tamilName?: string | null;
   categoryId?: number;
-  unit?: Unit;
+  unitId?: number;
   mrpRate?: string;
   normalRate?: string;
   originalRate?: string | null;

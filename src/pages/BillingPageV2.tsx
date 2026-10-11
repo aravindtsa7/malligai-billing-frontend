@@ -212,7 +212,7 @@ export const BillingPageV2: React.FC = () => {
       if (!isQuantityWithinStock(nextQty, product.currentStock)) {
         showFeedback(
           'error',
-          `Only ${formatQuantity(product.currentStock)} ${product.unit} available in stock for "${product.productName}".`
+          `Only ${formatQuantity(product.currentStock)} ${product.unit?.shortName || ''} available in stock for "${product.productName}".`
         );
         focusEntryInput();
         return false;
@@ -240,7 +240,9 @@ export const BillingPageV2: React.FC = () => {
           productCode: product.productCode,
           productName: product.productName,
           tamilName: product.tamilName,
-          unit: product.unit,
+          unitName: product.unit?.name || '',
+          unitShortName: product.unit?.shortName || '',
+          unit: product.unit?.shortName || '',
           currentStock: product.currentStock,
           normalRate: product.normalRate,
           retailRate: product.retailRate,
@@ -544,7 +546,7 @@ export const BillingPageV2: React.FC = () => {
     if (!isQuantityWithinStock(trimmed, target.currentStock)) {
       showFeedback(
         'error',
-        `Only ${formatQuantity(target.currentStock)} ${target.unit} available in stock for "${target.productName}".`
+        `Only ${formatQuantity(target.currentStock)} ${target.unitShortName || target.unit} available in stock for "${target.productName}".`
       );
       reviewEditingProductIdRef.current = null;
       setReviewEditingProductId(null);
@@ -1134,10 +1136,10 @@ export const BillingPageV2: React.FC = () => {
                           )}
                         </div>
                         <div className="dropdown-item-meta">
-                          <span className="dropdown-item-unit">{product.unit}</span>
+                          <span className="dropdown-item-unit">{product.unit?.name || ''}</span>
                           <span className="dropdown-item-rate font-mono font-semibold">₹{displayRate}</span>
                           <span className={`dropdown-item-stock font-mono ${inStock ? 'in-stock' : 'out-of-stock'}`}>
-                            {inStock ? `Stock: ${formatQuantity(product.currentStock)}` : 'Out of Stock'}
+                            {inStock ? `Stock: ${formatQuantity(product.currentStock)} ${product.unit?.shortName || ''}` : 'Out of Stock'}
                           </span>
                           {!product.active && <span className="dropdown-inactive-badge">Inactive</span>}
                         </div>
@@ -1237,7 +1239,7 @@ export const BillingPageV2: React.FC = () => {
                         )}
                         {item.isExceedingStock && (
                           <div className="v2-stock-warning">
-                            Exceeds stock ({formatQuantity(item.currentStock)} {item.unit} available)
+                            Exceeds stock ({formatQuantity(item.currentStock)} {item.unitShortName || item.unit} available)
                           </div>
                         )}
                       </td>
@@ -1266,7 +1268,7 @@ export const BillingPageV2: React.FC = () => {
                           aria-label={`Quantity for ${item.productName}`}
                         />
                       </td>
-                      <td className="td-unit text-center font-mono text-muted">{item.unit}</td>
+                      <td className="td-unit text-center font-mono text-muted">{item.unitName || item.unitShortName || item.unit}</td>
                       <td className="td-rate text-right font-mono font-semibold">
                         <span>₹{item.displayRate}</span>
                         {item.isOverridden && (
@@ -1511,7 +1513,7 @@ export const BillingPageV2: React.FC = () => {
                               }}
                               title="Click or press Enter to edit quantity"
                             >
-                              {formatQuantity(item.quantity)} {item.unit}
+                              {formatQuantity(item.quantity)} {item.unitShortName || item.unit}
                             </button>
                           )}
                         </td>
@@ -1758,7 +1760,7 @@ export const BillingPageV2: React.FC = () => {
                           <div className="receipt-item-code font-mono text-muted">{item.productCode}</div>
                         </td>
                         <td className="text-center font-mono">
-                          {formatQuantity(item.quantity)} {item.unit}
+                          {formatQuantity(item.quantity)} {item.unitShortName || item.unit}
                         </td>
                         <td className="text-right font-mono">₹{item.rate}</td>
                         <td className="text-right font-mono font-semibold">₹{item.amount}</td>

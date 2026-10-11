@@ -510,12 +510,12 @@ export const AdminDashboardPage: React.FC = () => {
                         {product.productName}
                       </span>
                       <span className="stock-alert-code">
-                        Code: {product.productCode} • {product.unit}
+                        Code: {product.productCode} • {product.unit?.name || product.unit?.shortName || ''}
                       </span>
                     </div>
                     <div className="stock-alert-right">
                       <span className="stock-alert-qty">
-                        {formatQuantity(product.currentStock)} {product.unit}
+                        {formatQuantity(product.currentStock)} {product.unit?.shortName || ''}
                       </span>
                       <button
                         type="button"

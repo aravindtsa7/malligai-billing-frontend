@@ -262,7 +262,7 @@ export const BillingPage: React.FC = () => {
     if (!isQuantityWithinStock(nextQty, product.currentStock)) {
       showBarcodeFeedback(
         'error',
-        `Only ${formatQuantity(product.currentStock)} ${product.unit} available in stock for "${product.productName}".`
+        `Only ${formatQuantity(product.currentStock)} ${product.unit?.shortName || ''} available in stock for "${product.productName}".`
       );
       focusBarcodeInput();
       return false;
@@ -294,7 +294,9 @@ export const BillingPage: React.FC = () => {
         productCode: product.productCode,
         productName: product.productName,
         tamilName: product.tamilName,
-        unit: product.unit,
+        unitName: product.unit?.name || '',
+        unitShortName: product.unit?.shortName || '',
+        unit: product.unit?.shortName || '',
         currentStock: product.currentStock,
         normalRate: product.normalRate,
         retailRate: product.retailRate,
@@ -404,7 +406,7 @@ export const BillingPage: React.FC = () => {
       if (!isQuantityWithinStock(nextQty, target.currentStock)) {
         showBarcodeFeedback(
           'error',
-          `Only ${formatQuantity(target.currentStock)} ${target.unit} available in stock for "${target.productName}".`
+          `Only ${formatQuantity(target.currentStock)} ${target.unitShortName || target.unit} available in stock for "${target.productName}".`
         );
         return;
       }
@@ -470,7 +472,7 @@ export const BillingPage: React.FC = () => {
     if (!isQuantityWithinStock(trimmed, target.currentStock)) {
       showBarcodeFeedback(
         'error',
-        `Only ${formatQuantity(target.currentStock)} ${target.unit} available in stock for "${target.productName}".`
+        `Only ${formatQuantity(target.currentStock)} ${target.unitShortName || target.unit} available in stock for "${target.productName}".`
       );
       // Reject: leave original cart quantity unchanged
       reviewEditingProductIdRef.current = null;
@@ -1038,16 +1040,16 @@ export const BillingPage: React.FC = () => {
                         </td>
                         <td className="td-tamil tamil-text text-muted">{product.tamilName || '—'}</td>
                         <td className="td-unit">
-                          <span className="unit-badge">{product.unit}</span>
+                          <span className="unit-badge">{product.unit?.name || '—'}</span>
                         </td>
                         <td className="td-rate text-right font-mono font-semibold text-primary">
                           ₹{activeRate}
                         </td>
                         <td className="td-stock text-right font-mono">
                           {!hasStock ? (
-                            <span className="text-danger font-semibold">0 <span className="stock-unit">{product.unit}</span></span>
+                            <span className="text-danger font-semibold">0 {product.unit?.shortName && <span className="stock-unit">{product.unit.shortName}</span>}</span>
                           ) : (
-                            <span>{formatQuantity(product.currentStock)} <span className="stock-unit">{product.unit}</span></span>
+                            <span>{formatQuantity(product.currentStock)} {product.unit?.shortName && <span className="stock-unit">{product.unit.shortName}</span>}</span>
                           )}
                         </td>
                         <td className="td-action text-center" onClick={(e) => e.stopPropagation()}>
@@ -1155,14 +1157,14 @@ export const BillingPage: React.FC = () => {
                           <div className="cart-item-meta">
                             <span className="cart-item-code font-mono">{item.productCode}</span>
                             <span className="cart-stock-hint">
-                              Stock: {formatQuantity(item.currentStock)} {item.unit}
+                              Stock: {formatQuantity(item.currentStock)} {item.unitShortName || item.unit}
                             </span>
                           </div>
                         </div>
                       </td>
                       <td className="td-cart-rate text-right font-mono font-semibold">
                         ₹{item.displayRate}
-                        <div className="cart-unit-subtext">/{item.unit}</div>
+                        <div className="cart-unit-subtext">/{item.unitShortName || item.unit}</div>
                       </td>
                       <td className="td-cart-qty text-center">
                         <div className="cart-qty-control">
@@ -1204,7 +1206,7 @@ export const BillingPage: React.FC = () => {
                                   handleUpdateQuantity(item.productId, prev);
                                   showBarcodeFeedback(
                                     'error',
-                                    `Only ${formatQuantity(item.currentStock)} ${item.unit} available in stock for "${item.productName}".`
+                                    `Only ${formatQuantity(item.currentStock)} ${item.unitShortName || item.unit} available in stock for "${item.productName}".`
                                   );
                                 } else {
                                   e.currentTarget.dataset.originalQty = trimmed;
@@ -1243,7 +1245,7 @@ export const BillingPage: React.FC = () => {
                         {!item.isValidQty && (
                           <div className="cart-qty-error-msg">
                             {item.isExceedingStock
-                              ? `Exceeds stock (${formatQuantity(item.currentStock)} ${item.unit})`
+                              ? `Exceeds stock (${formatQuantity(item.currentStock)} ${item.unitShortName || item.unit})`
                               : 'Invalid Qty'}
                           </div>
                         )}
@@ -1431,7 +1433,7 @@ export const BillingPage: React.FC = () => {
                               }}
                               title="Click or press Enter to edit quantity"
                             >
-                              {formatQuantity(item.quantity)} {item.unit}
+                              {formatQuantity(item.quantity)} {item.unitShortName || item.unit}
                             </div>
                           )}
                         </td>
@@ -1576,7 +1578,7 @@ export const BillingPage: React.FC = () => {
                           <div className="receipt-item-code font-mono text-muted">{item.productCode}</div>
                         </td>
                         <td className="text-center font-mono">
-                          {formatQuantity(item.quantity)} {item.unit}
+                          {formatQuantity(item.quantity)} {item.unitShortName || item.unit}
                         </td>
                         <td className="text-right font-mono">₹{item.rate}</td>
                         <td className="text-right font-mono font-semibold">₹{item.amount}</td>

@@ -113,6 +113,22 @@ export const AppLayout: React.FC = () => {
       ),
     },
     {
+      to: '/admin/units',
+      label: 'Unit of Measure',
+      matchPrefixes: ['/admin/units'],
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M2 12h20" />
+          <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6" />
+          <path d="M6 12V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5" />
+          <line x1="6" y1="9" x2="6" y2="12" />
+          <line x1="10" y1="9" x2="10" y2="12" />
+          <line x1="14" y1="9" x2="14" y2="12" />
+          <line x1="18" y1="9" x2="18" y2="12" />
+        </svg>
+      ),
+    },
+    {
       to: '/admin/stock',
       label: 'Stock Management',
       icon: (
@@ -225,6 +241,7 @@ export const AppLayout: React.FC = () => {
     if (path === '/billing-v2') return 'Create Bill V2';
     if (path.startsWith('/bills')) return 'Bill History';
     if (path.startsWith('/admin/categories')) return 'Category Master';
+    if (path.startsWith('/admin/units')) return 'Unit of Measure';
     if (path.startsWith('/admin/products')) return 'Product Management';
     if (path.startsWith('/admin/stock')) return 'Stock Management';
     if (path.startsWith('/admin/salesmen')) return 'Salesman Management';

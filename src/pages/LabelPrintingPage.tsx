@@ -557,11 +557,11 @@ export const LabelPrintingPage: React.FC = () => {
                         </div>
                         <div className="meta-box">
                           <span className="meta-label">Current Stock</span>
-                          <span className="meta-value font-mono">{formatQuantity(selectedProduct.currentStock)} {selectedProduct.unit}</span>
+                          <span className="meta-value font-mono">{formatQuantity(selectedProduct.currentStock)} {selectedProduct.unit?.shortName || ''}</span>
                         </div>
                         <div className="meta-box">
                           <span className="meta-label">Unit</span>
-                          <span className="meta-value">{selectedProduct.unit}</span>
+                          <span className="meta-value">{selectedProduct.unit?.name || ''}</span>
                         </div>
                       </div>
                     </div>

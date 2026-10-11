@@ -1,4 +1,3 @@
-import type { Unit } from './product.types.ts';
 import type { Role } from './auth.types.ts';
 import type { ReceiptSnapshot } from './receipt-settings.types.ts';
 
@@ -29,7 +28,9 @@ export interface SerializedBillItem {
   productCode: string;
   productName: string;
   tamilName: string | null;
-  unit: Unit;
+  unitName: string;
+  unitShortName: string;
+  unit?: string;
   quantity: string;
   rateType: RateType;
   rate: string;
@@ -101,7 +102,9 @@ export interface CartItem {
   productCode: string;
   productName: string;
   tamilName: string | null;
-  unit: Unit;
+  unitName: string;
+  unitShortName: string;
+  unit?: string;
   currentStock: string;
   normalRate: string;
   retailRate: string;

@@ -10,6 +10,7 @@ import { SalesmanDashboardPage } from './pages/SalesmanDashboardPage.tsx';
 import { ProductListPage } from './pages/ProductListPage.tsx';
 import { ProductFormPage } from './pages/ProductFormPage.tsx';
 import { CategoryMasterPage } from './pages/CategoryMasterPage.tsx';
+import { UnitMasterPage } from './pages/UnitMasterPage.tsx';
 import { StockManagementPage } from './pages/StockManagementPage.tsx';
 import { BillingPage } from './pages/BillingPage.tsx';
 import { BillingPageV2 } from './pages/BillingPageV2.tsx';
@@ -60,6 +61,7 @@ export const App: React.FC = () => {
             <Route element={<AppLayout />}>
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/admin/categories" element={<CategoryMasterPage />} />
+              <Route path="/admin/units" element={<UnitMasterPage />} />
               <Route path="/admin/products" element={<ProductListPage />} />
               <Route path="/admin/products/new" element={<ProductFormPage />} />
               <Route path="/admin/products/:id/edit" element={<ProductFormPage />} />

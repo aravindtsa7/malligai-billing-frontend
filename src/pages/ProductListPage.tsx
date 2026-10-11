@@ -198,6 +198,19 @@ export const ProductListPage: React.FC = () => {
           </button>
           <button
             type="button"
+            className="btn btn-outline"
+            onClick={() => navigate('/admin/units')}
+            title="Manage units of measure master"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M2 12h20" />
+              <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6" />
+              <path d="M6 12V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5" />
+            </svg>
+            Manage Units
+          </button>
+          <button
+            type="button"
             className="btn btn-outline btn-refresh"
             onClick={handleRefresh}
             disabled={productsLoading || categoriesLoading}
@@ -406,16 +419,10 @@ export const ProductListPage: React.FC = () => {
                 <thead>
                   <tr>
                     <th className="th-code">Code</th>
-                    <th className="th-barcode">Barcode</th>
                     <th className="th-name">Product Name</th>
-                    <th className="th-tamil">Tamil Name</th>
-                    {selectedCategoryId === null && <th className="th-category">Category</th>}
+                    <th className="th-category">Category</th>
                     <th className="th-unit">Unit</th>
-                    <th className="th-rate text-right" title="Maximum Retail Price">MRP</th>
-                    <th className="th-rate text-right" title="Cost / Purchase price (Not for billing)">Cost</th>
-                    <th className="th-rate text-right" title="Normal Selling Rate">Normal</th>
-                    <th className="th-rate text-right" title="Retail Customer Rate">Retail</th>
-                    <th className="th-rate text-right" title="Function / Bulk Rate">Function</th>
+                    <th className="th-rate text-right">Normal Rate</th>
                     <th className="th-stock text-right">Stock</th>
                     <th className="th-status text-center">Status</th>
                     <th className="th-action th-action-sticky text-center">Action</th>
@@ -425,31 +432,21 @@ export const ProductListPage: React.FC = () => {
                   {products.map((product) => (
                     <tr key={product.id} className={!product.active ? 'row-inactive' : ''}>
                       <td className="td-code font-mono font-semibold">{product.productCode}</td>
-                      <td className="td-barcode font-mono text-muted" title={product.barcode || 'No barcode'}>
-                        {product.barcode || '—'}
-                      </td>
                       <td className="td-name font-medium">{product.productName}</td>
-                      <td className="td-tamil tamil-text text-muted">{product.tamilName || '—'}</td>
-                      {selectedCategoryId === null && (
-                        <td className="td-category">
-                          <span className="category-badge">
-                            {product.category?.categoryName || '—'}
-                            {product.category && !product.category.active && (
-                              <span className="badge-inactive-dot" title="Category is inactive"> •</span>
-                            )}
-                          </span>
-                        </td>
-                      )}
-                      <td className="td-unit">
-                        <span className="unit-badge">{product.unit}</span>
+                      <td className="td-category">
+                        <span className="category-badge">
+                          {product.category?.categoryName || '—'}
+                          {product.category && !product.category.active && (
+                            <span className="badge-inactive-dot" title="Category is inactive"> •</span>
+                          )}
+                        </span>
                       </td>
-                      <td className="td-rate text-right font-mono font-semibold">₹{product.mrpRate}</td>
-                      <td className="td-rate text-right font-mono text-cost">₹{product.originalRate}</td>
+                      <td className="td-unit">
+                        <span className="unit-badge">{product.unit?.name || '—'}</span>
+                      </td>
                       <td className="td-rate text-right font-mono font-semibold">₹{product.normalRate}</td>
-                      <td className="td-rate text-right font-mono">₹{product.retailRate}</td>
-                      <td className="td-rate text-right font-mono">₹{product.functionRate}</td>
                       <td className="td-stock text-right font-mono font-semibold">
-                        {formatQuantity(product.currentStock)} <span className="stock-unit">{product.unit}</span>
+                        {formatQuantity(product.currentStock)} {product.unit?.shortName && <span className="stock-unit">{product.unit.shortName}</span>}
                       </td>
                       <td className="td-status text-center">
                         <span className={`status-badge ${product.active ? 'status-active' : 'status-inactive'}`}>
